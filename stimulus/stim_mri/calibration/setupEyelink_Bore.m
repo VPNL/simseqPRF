@@ -1,0 +1,123 @@
+function setupEyelink_Bore( edfName, win )
+% setupEyelink_Toon setups eyelink system for eye tracking with the 
+% projector.
+%
+%   setupEyelink_Projector( edfName )
+%       edfName - (string) what you would like to call your edf (should be
+%                          no more than 8 characters)
+%       win - PsychToolBox window pointer
+%
+% AR March 2019
+% AR April 2019 Updated distance to screen
+% AR June 2019 Adapted function for kidLoc experiment
+
+% Set scaling factor for shrinking screen resolution to fit on projector
+shrinkWidth = .5; % This fraction of the width will be taken off
+shrinkHeight = .5; % This fraction of the height will be taken off
+
+% Initialize eyelink and check to make sure Eyelink is online
+if EyelinkInit() ~= 1
+    error(['Cannot connect to eye tracker. Try turning off wifi.'])
+end
+
+%% Eyelink setup
+
+% Get init defaults
+el = EyelinkInitDefaults(win);
+
+% Open edf file to record data
+edf = Eyelink('Openfile',edfName);
+% Check to make sure file was created
+if edf ~= 0
+    Eyelink('Shutdown')
+    error(['Could not create EDF file ' edfName ...
+           '. Try turning off wifi']);
+end
+
+% Setting eyelink preferences and parameters
+Eyelink('command', 'add_file_preamble_text ''dynamic stim eyetracking''');
+Eyelink('command', 'screen_distance = 250'); % Distance from participant's 
+                                             % eye to bore monitor
+                                             % (measured 04/2019 by AR)
+Eyelink('command', 'calibration_type = HV5'); % 3 point calibration, 
+                                              % set in calibr.ini
+
+% allow to use eyelink GUI to accept fixations/targets
+Eyelink('command', 'button_function 5 "accept_target_fixation"');   
+
+% Telling eyelink what to record
+Eyelink('command', ...
+        'file_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,MESSAGE,BUTTON');
+Eyelink('command', ...
+        'file_sample_data  = LEFT,RIGHT,GAZE,DIAMETER,HREF,AREA,GAZERES,STATUS');
+Eyelink('Command', 'file_event_data = GAZE,GAZEREZ,DIAMETER,HREF,VELOCITY');
+Eyelink('command', ...
+        'link_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,MESSAGE,BUTTON');
+Eyelink('command', ...
+        'link_sample_data  = LEFT,RIGHT,GAZE,GAZERES,AREA,STATUS');                                           
+                                              
+%% Shrinking screen size for calibration
+[width, height]=Screen('WindowSize',win); % returns full screen size in 
+                                          % pixels
+
+Eyelink('command', 'sample_rate = %d',1000);
+
+
+% Set screen coordinates
+Eyelink('command','screen_pixel_coords = %ld %ld %ld %ld', 0, 0, ...
+        width-1, height-1); % sets physical.ini to screen pixels
+Eyelink('message', 'DISPLAY_COORDS %ld %ld %ld %ld', 0, 0, width-1, ...
+        height-1);
+    
+% Set to NO to override default calibration and validation targets, 
+% to reset for subsequent experiments change to YES.
+Eyelink('command','generate_default_targets = NO');
+    
+%% **** Three point calibration ****
+% Storing usable screen size as variable rect. rect(1) sets the 
+% distance from the left side of the screen (if 0, dots could appear at far
+% left). rect(2) shrinks the height from the top (if 0, dots could appear 
+% at the very top). rect(3) controls how far the dots are from the right 
+% side of the screen (if width-1, dots could appear at far right). rect(4) 
+% controls how far the dots are from the bottom of the screen (if height-1, 
+% dots could appear at very bottom).
+% rect = round([width*shrinkWidth, height*shrinkHeight, ...
+%         width - width*shrinkWidth, height-height*shrinkHeight]);
+%
+%     Eyelink('command','calibration_samples = 3');
+% Eyelink('command','calibration_targets = %d,%d %d,%d %d,%d',...
+%         rect(1),rect(4), rect(3),rect(4), width*.5,rect(2));
+% Eyelink('command','validation_samples = 3');
+% Eyelink('command','validation_targets = %d,%d %d,%d %d,%d',...
+%         rect(1),rect(4), rect(3),rect(4), width*.5,rect(2));    
+    
+%% **** Five point calibration ****
+
+widthShrink  = 960+(width*shrinkWidth);
+heightShrink = 540+(height*shrinkHeight);
+
+Eyelink('command','calibration_samples = 6');
+Eyelink('command','calibration_sequence = 0,1,2,3,4,5');
+Eyelink('command','calibration_targets = %d,%d %d,%d %d,%d %d,%d %d,%d',...
+                round(widthShrink/2), round(heightShrink/2), ... center
+                round(widthShrink/2), round(heightShrink*0.3),... lower
+            round(widthShrink/2), round(heightShrink) - round(heightShrink*0.3),... upper
+            round(widthShrink*0.2), round(heightShrink/2),... left
+            round(widthShrink) - round(widthShrink*0.3), round(heightShrink/2)); % right
+
+Eyelink('command','validation_samples = 5');
+Eyelink('command','validation_sequence = 0,1,2,3,4,5');
+Eyelink('command','validation_targets = %d,%d %d,%d %d,%d %d,%d %d,%d',... 
+                 round(widthShrink/2), round(heightShrink/2), ... center
+                round(widthShrink/2), round(heightShrink*0.3),... lower
+            round(widthShrink/2), round(heightShrink) - round(heightShrink*0.3),... upper
+            round(widthShrink*0.3), round(heightShrink/2),... left
+            round(widthShrink) - round(widthShrink*0.3), round(heightShrink/2)); % right
+
+%% Calibrate
+fprintf('\n\nRun calibration, validation and drift correction now. When done, hit "Output/Record"\n\n\n');
+
+% Run calibration, validation and drift correction
+EyelinkDoTrackerSetup(el);
+
+end

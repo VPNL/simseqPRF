@@ -1,0 +1,14 @@
+**.mp4
+**.png
+stimulus/stim_mri/cartoon/*
+stimulus/stim_simulation/**.mat
+stimulus/stim_simulation/varyConditions/
+figures/*
+data/*
+results/*
+**.m~
+**/.json~
+**.DS_store
+**.asv
+.autosave
+*.asv

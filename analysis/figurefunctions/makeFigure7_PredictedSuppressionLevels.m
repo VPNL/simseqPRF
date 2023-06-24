@@ -1,0 +1,23 @@
+function fH = makeFigure7_PredictedSuppressionLevels(lmmResults, lmmResults_Model,roisToPlot,cmapROIs)
+
+%% Plot predicted regression slopes
+all_lmmResults = cat(1,lmmResults_Model,lmmResults);
+
+LMMOrder = {'LSS','CSS','CST','Data'};
+saveFigs = false;
+fH = plotLMMfittedRegressionSlopes(all_lmmResults,LMMOrder,roisToPlot,cmapROIs, saveFigs);
+
+return
+
+%% To plot line fits to single voxel predicted BOLD amplitudes (alike Figure 4A)
+% modelNames = = {'LSS','CSS','CST'};
+% for  mm = 1:3
+%     fH = plotMeanSeqVsSimAmplitude_voxel(ds, fLMM_Model(mm,:), ...
+%         'fixedIntercepts', lmmResults_Model.fixedIntercepts(mm,:), ...
+%         'fixedSlopes', lmmResults_Model.fixedSlopes(mm,:), ...
+%         'fixedIntercepts_CI', lmmResults_Model.fixedIntercepts_CI(mm,:), ...
+%         'fixedSlopes_CI', lmmResults_Model.fixedSlopes_CI(mm,:), ...
+%         'plotAllSubjectsTogether', true, ...
+%         'plotModelAmpl', true, ...
+%         'whichModelToPlot',modelNames{mm});
+% end
