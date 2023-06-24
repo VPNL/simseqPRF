@@ -37,14 +37,4 @@ VistaSoft toolbox: https://github.com/vistalab/vistasoft
 * analysis/
     - folder with analysis scripts and subfunctions, and figure plotting functions
 
-NB. Participants S1 through S10 in the paper correspond to participants with different naming convention ("subjXX") from a larger dataset shared between multiple projects:
-S1: subj01
-S2: subj02
-S3: subj03
-S4: subj07
-S5: subj08
-S6: subj09
-S7: subj10
-S8: subj11
-S9: subj12
-S10: subj13
+NB. Participants S1 through S10 in the paper correspond to participants with different naming convention ("subjXX") from a larger dataset shared between multiple projects: [S1: subj01, S2: subj02, S3: subj03, S4: subj07, S5: subj08, S6: subj09, S7: subj10, S8: subj11, S9: subj12, S10: subj13]
