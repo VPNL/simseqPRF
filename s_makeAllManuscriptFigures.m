@@ -48,10 +48,6 @@ switch modelName
             spatialModel   = {'onegaussianFit','cssFit','onegaussianFit'};
             temporalModel  = {'3ch-stLN','1ch-glm','1ch-glm'};
         end
-%         postFix        = '_variableBlockOnset_gridFit_v4';
-%         subDir2        = 'gridFit2_Results';
-%         roiType        = 'stimcorner4_area4sq_eccen5'; %
-%         subDir         = 'lmmFit_randomIntcptSlopeSubjInteraction_seq_vs_sim_ampl_gridFit2_v4';
         useSTRetParams = false;
         cmapBetas      = getColormapPRFModels(0);
         
@@ -60,24 +56,14 @@ switch modelName
         spatialModel = {'oneGaussianFit','oneGaussianFit','oneGaussianFit'};
         temporalModel = {'3ch-stLN','3ch-stLN','1ch-dcts'};
         stRetParamsFlag = true;
-        
-%         postFix        = '_variableBlockOnset_stRetParams_CSTopt_DNST_matchingVoxels_v4';
-%         subDir2        = 'stRetParams_Results';
-%         roiType        = sprintf('stimcorner4_area4sq_eccen5_stRet'); %
-%         subDir         = 'lmmFit_randomIntcptSlopeSubjInteraction_seq_vs_sim_ampl_stRetParams';
         useSTRetParams = true;
         cmapBetas      = getColormapPRFModels(3);
 
     case 'DoG'
         spatialModel   = 'differenceOfGaussiansFit';
         temporalModel  = '1ch-glm';
-%         postFix        = sprintf('_variableBlockOnset_DoG_%s_v3',temporalModel);
-%         subDir2        = 'DoG_Results';
-%         roiType        = 'stimcorner4_area4sq_eccen5'; %
-%         subDir         = 'lmmFit_randomIntcptSlopeSubjInteraction_seq_vs_sim_amplDoG_v3';
         useSTRetParams = false;
         cmapBetas      = getColormapPRFModels(4);
-
 end
 
                 
@@ -143,17 +129,29 @@ fH8 = makeFigure8_SuppressionLevels_v_pRFParams(ds,lmmResults,roisToPlot,...
 fHS1 = plotMeanSeqVsSimAmplitude_voxel(ds, fLMM, lmmResults, ...
     'plotAllSubjectsTogether', true);
 
-%% SUPPLEMENTARY FIGURE 2: Simulated model predictions (and Fig 5: spatial/temporal filters)
+%% SUPPLEMENTARY FIGURE 2: Delta suppresion levels across the visual hierarchy
+% in progress
+
+%% SUPPLEMENTARY FIGURE 3: Simulated model predictions (and Fig 5: spatial/temporal filters)
 fHS2 = makeSupplFigure2_SimulateModelPredictions(saveFigs);
 
-%% SUPPLEMENTARY FIGURE 3: CST exponent distributions
+%% SUPPLEMENTARY FIGURE 4: CST exponent distributions
 fHS3 = makeSupplFigure3_DistributionCSTExponents(ds,roisToPlot,cmapROIs,saveFigs);
 
-%% SUPPLEMENTARY FIGURE 4: Eye tracking
+%% SUPPLEMENTARY FIGURE 5: Eye tracking
 fHS4 = makeSupplFigure4_eyefixation(projectDir,[],saveFigs);
 
-%% SUPPLEMENTARY FIGURE 5: LMM comparisons
+%% SUPPLEMENTARY FIGURE 6: LMM comparisons
 fHS5 = makeSupplFigure5_compareLMMs(projectDir, saveFigs);
+
+%% SUPPLEMENTARY FIGURE 7: Difference of Gaussian model
+% in progress
+
+%% SUPPLEMENTARY FIGURE 8: Spatiotemporal pRF models (time series and cv-R^2)
+% in progress
+
+%% SUPPLEMENTARY FIGURE 9: Spatiotemporal pRF models (predicted suppression and parameters)
+% in progress
 
 %% Extra figures
 % TO PLOT INDIVIDUAL SUBJECTS SIM vs SEQ VOXEL AMPLITUDES (SCATTERPLOTS)
