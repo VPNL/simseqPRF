@@ -1,5 +1,5 @@
 function fH = plotMeanCSTSustainedTransientBetaWeights(mean_resampledBetavalSust, ...
-    mean_resampledBetavalTrans,roisToPlot,saveFigs)
+    mean_resampledBetavalTrans,roisToPlot,saveFigs,saveFigDir)
 
 % Set colors
 roiColors = getROISummaryColors(0);
@@ -35,10 +35,12 @@ ylim([0 1.8])
 legend('Sustained','Transient'); legend box off
 
 if saveFigs
-    saveFigDir = fullfile(simseqRootPath,'results','group');
-    subDir     = 'fig8';
+    if ~exist(saveFigDir,'dir')
+        saveFigDir = fullfile(simseqRootPath,'results','group');
+    end
     fName = sprintf('SummaryGroupAverageSEM_BetaCSTSustainedTransient_resampled');
-    thisSaveFigDir = fullfile(saveFigDir,subDir);
+    thisSaveFigDir = fullfile(saveFigDir,'fig8');
+    if ~exist(thisSaveFigDir,'dir'); mkdir(thisSaveFigDir); end
     saveas(gcf, fullfile(thisSaveFigDir, [fName '.png']))
 %     print(gcf,fullfile(thisSaveFigDir,fName),'-depsc')
 end

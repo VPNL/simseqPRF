@@ -1,6 +1,4 @@
-function fH = makeFigure6_PRFModelFits(ds,roisToPlot)
-
-saveFigs = false;
+function fH = makeFigure6_PRFModelFits(ds,roisToPlot,spatialModel,temporalModel,saveFigs, saveFigDir)
 
 %% Panel A: Plot V1 voxel time series + predicted pRF response per condition
 projectDir  = fullfile(simseqRootPath);
@@ -13,15 +11,15 @@ fH(2)       = plotDataModelFit_singleVoxel_StimulusConditionBlocks(projectDir,su
     'roisToPlot',{'VO1'},'selectedDataVoxels',220, 'plotModelFlag',true);
 
 %% Get resampled data
-[~,~,~,~,~,resampledCVR2, ~, mean_diffCVR2, maxNC] = ...
-            resamplePRFParams_wReplacement(ds);
+subjnrs = [1:3,7:13];
+useSTRetParams = false;
+output = resamplePRFParams_wReplacement(ds, roisToPlot, useSTRetParams, temporalModel, spatialModel, subjnrs);
         
 %% Panel C: Plot distribution pRF model cross-validated R2 (violin graph)   
-fH(3) = plotPRFModelCVRSQ_violinPlot(ds,resampledCVR2,maxNC,roisToPlot,saveFigs);
+fH(3) = plotPRFModelCVRSQ_violinPlot(ds,output.resampledCVR2,output.maxNC,roisToPlot,saveFigs, saveFigDir);
 
 %% Panel D: Plot pRF model difference cross-validated R2 (bar graph)
-fH(4) = plotDiffPRFModelCVR2_bargraph(mean_diffCVR2,roisToPlot,saveFigs);
-
+fH(4) = plotDiffPRFModelCVR2_bargraph(output.mean_diffCVR2,roisToPlot,saveFigs, saveFigDir);
 
 %% Do some statistics (ANOVA)
 

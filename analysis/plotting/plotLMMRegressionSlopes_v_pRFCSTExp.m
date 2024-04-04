@@ -1,4 +1,4 @@
-function fH = plotLMMRegressionSlopes_v_pRFCSTExp(lmmResults,resampled_medianCSTExp,roisToPlot, cmapROIs, saveFigs)
+function fH = plotLMMRegressionSlopes_v_pRFCSTExp(lmmResults,resampled_medianCSTExp,roisToPlot, cmapROIs, saveFigs,saveFigDir)
 
 fH = figure; set(gcf,'Position',[889,294,963,604]);  hold all;
 

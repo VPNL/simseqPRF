@@ -100,7 +100,7 @@ for subjnr  = subjnrs
     clear a idx
     
     % Define figures
-    fH = figure(102); clf;  szScr = get(0,'ScreenSize');
+    fH = figure; clf;  szScr = get(0,'ScreenSize');
     if plotModelFlag
         set(fH, 'Position', [0,0,szScr(3),szScr(4)]); hold on;
     else
@@ -385,7 +385,7 @@ for subjnr  = subjnrs
             else
                 sgtitle({sprintf('%s: Mean trial amplitude Data', rois{roi}), ''},...
                      'FontSize', 12,  'HorizontalAlignment','left')
-                subplots = [ncols+(1:ncols)];
+                subplots = [(3*ncols)+(1:ncols)];
             end
             clear subYLim;
             

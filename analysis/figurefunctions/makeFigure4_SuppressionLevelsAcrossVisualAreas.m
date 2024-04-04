@@ -1,26 +1,34 @@
-function fH = makeFigure4_SuppressionLevelsAcrossVisualAreas(ds,fLMM,lmmResults,roisToPlot,cmapROIs)
+function fH = makeFigure4_SuppressionLevelsAcrossVisualAreas(ds,lmmResults, ...
+            roisToPlot, cmapROIs, useSTRetParams, saveFigs, saveFigDir)
 
+% Check inputs
+if isempty(cmapROIs) || ~exist('cmapROIs','var')
+    cmapROIs = getROISummaryColors(0);
+end
+
+if isempty(useSTRetParams) || ~exist('useSTRetParams','var')
+    useSTRetParams = false;
+end
 
 %% Panel A: PLOT ALL SUBJECTS DATA AND FIT IN ONE FIGURE
-fH(1) = plotMeanSeqVsSimAmplitude_voxel(ds, fLMM, lmmResults,...
-    'fixedIntercepts', lmmResults.fixedIntercepts, ...
-    'fixedSlopes', lmmResults.fixedSlopes, ...
-    'fixedIntercepts_CI', lmmResults.fixedIntercepts_CI, ...
-    'fixedSlopes_CI', lmmResults.fixedSlopes_CI, ...
-    'plotAllSubjectsTogether', true);
+fH(1) = plotMeanSeqVsSimAmplitude_voxel(ds, lmmResults,...
+    'plotAllSubjectsTogether', true, ...
+    'saveFigs', saveFigs, ...
+    'saveFigDir', saveFigDir);
 
 %% Plot LMM fitted regression slopes
 LMMOrder = {'Data'};
-saveFigs = false;
-fH(2) = plotLMMfittedRegressionSlopes(lmmResults,LMMOrder,roisToPlot,cmapROIs, saveFigs);
+fH(2) = plotLMMfittedRegressionSlopes(lmmResults,LMMOrder, ...
+        roisToPlot, cmapROIs, useSTRetParams, saveFigs,saveFigDir);
 
 %% Do some stats (ANOVA and post-hoc multiple comparisons)
 
-nrSubjects   = 10;
-nrConditions = 4;
+nrSubjects   = length(unique(ds.Subject));
 nrROIs       = length(roisToPlot);
-conditionNamesSimSeq = {'Small & short (0.2s)','Small & long (1s)', ...
-                        'Large & Short (0.2s)','Large & Long (1s)'};
+conditionNamesSimSeq = {'Small & Short (0.2s)','Small & long (1s)', ...
+                        'Big & Short (0.2s)','Big & Long (1s)'};
+nrConditions = length(conditionNamesSimSeq);
+
 % Accumulate all slopes in one array
 allROISlopes = NaN(nrSubjects,nrConditions,nrROIs); 
 for ii = 1:nrROIs

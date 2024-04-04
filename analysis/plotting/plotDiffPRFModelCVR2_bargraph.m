@@ -1,4 +1,4 @@
-function fH = plotDiffPRFModelCVR2_bargraph(mnDiffR2Subj,roisToPlot,saveFigs)
+function fH = plotDiffPRFModelCVR2_bargraph(mnDiffR2Subj,roisToPlot,saveFigs, saveFigDir)
 
 % Set up figure params
 cmapModels = getColormapPRFModels(0); % Model colors
@@ -59,9 +59,10 @@ ylabel('Cross-validated variance explained (%)')
 
 % Save if requested
 if saveFigs
-    saveFigDir = fullfile(simseqRootPath,'results','group');
-    subDir = 'fig6';
-    thisSaveFigDir = fullfile(saveFigDir, subDir);
+    if ~exist('saveFigDir','var')
+        saveFigDir = fullfile(simseqRootPath,'results','group');
+    end
+    thisSaveFigDir = fullfile(saveFigDir, 'fig6');
     fName = sprintf('SummaryGroupR2_gridFit2_diff_CST');   
     if ~exist(thisSaveFigDir,'dir'); mkdir(thisSaveFigDir); end
     saveas(gcf, fullfile(thisSaveFigDir, [fName '.png']))

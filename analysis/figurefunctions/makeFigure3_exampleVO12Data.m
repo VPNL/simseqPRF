@@ -1,10 +1,13 @@
-function fH = makeFigure3_exampleVO12Data(ds, fLMM, lmmResults, projectDir,subjnr) 
+function fH = makeFigure3_exampleVO12Data(ds, fLMM, lmmResults, projectDir,subjnr, saveFigs, saveFigDir)
 
 %% Panel A: Plot VO1/2 voxel time series per condition
 fH(1) = plotDataModelFit_singleVoxel_StimulusConditionBlocks(projectDir,subjnr,...
-    'roisToPlot',{'VO1'},'selectedDataVoxels',220, 'plotModelFlag',false);
+    'roisToPlot',{'VO1'},'selectedDataVoxels',220, 'plotModelFlag',false, ...
+    'saveFigDir',saveFigDir, 'saveFigs', saveFigs);
 
 %% Panel B: Scatter plot VO1/2 all voxel data, subject S3
-fH(2) = plotMeanSeqVsSimAmplitude_voxel(ds, fLMM, lmmResults, 'subjnrs',subjnr,'saveFigs',false, 'roisToPlot',5);
+fH(2) = plotMeanSeqVsSimAmplitude_voxel(ds, fLMM, lmmResults, ...
+    'subjnrs',subjnr,'roisToPlot',5, ...
+    'saveFigDir',saveFigDir, 'saveFigs', saveFigs);
 
 return

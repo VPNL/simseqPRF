@@ -1,11 +1,18 @@
-function fH = plotMeanSeqVsSimAmplitude_voxel(ds, fLMM, lmmResults, varargin)
+function fH = plotMeanSeqVsSimAmplitude_voxel(ds, lmmResults, varargin)
 % Function to plot average voxel SEQ block amplitude vs SIM block
-% amplitude, colored by pRF size
+% amplitude, colored by pRF size. 
+% 
+% INPUTS (required):
+% - ds         : dataset
+% - lmmResults : struct with following fields:
+%                       fixedIntercepts, fixedSlopes, 
+%                       fixedIntercepts_CI, fixedSlopes_CI
+% OUTPUTS:
+% - fH         : figure handle
 
 % Parse inputs
 p = inputParser;
 p.addRequired('ds');
-p.addRequired('fLMM', @iscell);
 p.addRequired('lmmResults', @isstruct);
 p.addParameter('LMMlbl',[],@ischar);
 p.addParameter('subjnrs',[1:3,7:13],@isnumeric);
@@ -27,9 +34,9 @@ p.addParameter('subDir',[],@ischar);
 p.addParameter('mrkrSz',24, @isnumeric);
 p.addParameter('edgesSz',[0:2:12], @isnumeric); % Color dots by pRF size (binned)
 p.addParameter('AlphaLevelMarker',1, @isnumeric);
-p.parse(ds,fLMM,lmmResults,varargin{:});
+p.parse(ds,lmmResults,varargin{:});
 
-% Rename variables
+% Rename input variables
 fnToRename = fieldnames(p.Results);
 for ff = 1:length(fnToRename)
     eval([sprintf('%s = p.Results.(fnToRename{ff});', fnToRename{ff})]);

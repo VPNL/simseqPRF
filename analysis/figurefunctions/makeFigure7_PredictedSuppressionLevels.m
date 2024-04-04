@@ -1,11 +1,11 @@
-function fH = makeFigure7_PredictedSuppressionLevels(lmmResults, lmmResults_Model,roisToPlot,cmapROIs)
+function fH = makeFigure7_PredictedSuppressionLevels(lmmResults, lmmResults_Model,roisToPlot,cmapROIs,saveFigs,saveFigDir)
 
 %% Plot predicted regression slopes
 all_lmmResults = cat(1,lmmResults_Model,lmmResults);
 
 LMMOrder = {'LSS','CSS','CST','Data'};
-saveFigs = false;
-fH = plotLMMfittedRegressionSlopes(all_lmmResults,LMMOrder,roisToPlot,cmapROIs, saveFigs);
+useSTRetParams = false;
+fH = plotLMMfittedRegressionSlopes(all_lmmResults,LMMOrder,roisToPlot,cmapROIs, useSTRetParams, saveFigs, saveFigDir);
 
 return
 

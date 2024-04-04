@@ -1,5 +1,5 @@
 function fH = plotMeanCSTExponent_v_MeanCSSExponent(...
-    resampled_medianCSTExp,resampled_medianCSSExp,roisToPlot,cmapROIs,saveFigs)
+    resampled_medianCSTExp,resampled_medianCSSExp,roisToPlot,cmapROIs,saveFigs,saveFigDir)
 
 fH = figure; clf; set(gcf,'Position',[889,294,963,604],'color','w');
 
@@ -24,10 +24,13 @@ legend(l.Children([length(l.Children)-1:-4:1]),string(roisToPlot), 'FontSize',9,
 sgtitle(sprintf('Group average (+/- SEM) (N=%d)', size(resampled_medianCSTExp,1)));
 
 if saveFigs
-    saveFigDir = fullfile(simseqRootPath,'results','group');
+    if ~exist(saveFigDir,'dir')
+        saveFigDir = fullfile(simseqRootPath,'results','group');
+    end
     subDir     = 'fig8';
     fName = sprintf('SummaryGroupAverageSEM_MedianCSSvsCSTExpPRF');
     thisSaveFigDir = fullfile(saveFigDir, subDir);
+    if ~exist(thisSaveFigDir,'dir'); mkdir(thisSaveFigDir); end
     saveas(gcf, fullfile(thisSaveFigDir, [fName '.png']))
 %     print(gcf,fullfile(thisSaveFigDir,fName),'-depsc')
 end

@@ -1,4 +1,4 @@
-function fH = plotLMMfittedRegressionSlopes(lmmResults,LMMOrder, roisToPlot,cmapROIs, saveFigs)
+function fH = plotLMMfittedRegressionSlopes(lmmResults,LMMOrder, roisToPlot,cmapROIs, useSTRetParams, saveFigs, saveFigDir)
 % Function to plot Linear Mixed Model fitted regression slopes (fixed and
 % random subject slopes, for each condition and visual area).
 % To plot Figure 4B, "LMMResults" struct has fields with size {1,nrROIs}
@@ -16,24 +16,18 @@ if ~exist('saveFigs','var') || isempty(saveFigs)
     saveFigs = false; % Save figures or not
 end
 
+if ~exist('useSTRetParams','var') || isempty(useSTRetParams)
+    useSTRetParams = false; 
+end
+
 % Set params
 conditionOrderSimSeq = 1:4;
 subplotOrder         = [2,1,4,3];
-conditionNamesSimSeq = {'Small & short (0.2s)','Small & long (1s)','Big & Short (0.2s)','Big & Long (1s)'};
-% roisToPlot           = {'V1','V2','V3','hV4','VO1VO2','V3AB','IPS0IPS1','LO1LO2','TO1TO2'}; 
-% cmapROIs             = getROISummaryColors(0);
-% newROIOrder          = [1,2,3,4,5,8,9,6,7];
-% cmapROIs             = cmapROIs(newROIOrder,:);
+conditionNamesSimSeq = {'Small & Short (0.2s)','Small & Long (1s)','Big & Short (0.2s)','Big & Long (1s)'};
 
 if plotModelAmpl
-    markerTypes = {'o','o','o','+'}; % ModelOrder and cross for Data
-    darkgray   = [0.5 0.5 0.5];
-    orange     = [255 140 0]./255;
-    blue       = [26 115 225]./255;
-    black = [0 0 0];
-    cmap       = [darkgray;orange;blue];
+    cmap = getColormapPRFModels(0);
 else
-    markerTypes = {'o','o','o','o'};
     cmap = cmapROIs;
 end
 
@@ -42,8 +36,34 @@ end
 fH = figure; clf; set(gcf,'Position',[669 30 1342 905]);
 dataMat = reshape(cell2mat(lmmResults(end).fixedSlopes),4,[]);
 seMat = reshape(cell2mat(lmmResults(end).fixedSlopes_SE),4,[]);
+
+if useSTRetParams
+    clear dataMat seMat
+    for ii = 1:length(roisToPlot)
+        sj = unique(ds.Subject(ds.ROI==roisToPlot(ii)))';
+        sj2 = ismember(sj,[1:7]);
+        dataMat(:,ii) = mean(lmmResults(end).subjSlopes{ii}(sj2,:),1,'omitnan');
+        seMat(:,ii)   = std(lmmResults(end).subjSlopes{ii}(sj2,:),[],1,'omitnan')/sqrt(length(sj2));
+    end
+end
+
 x = [1:9]+[-0.4,0.4]';
 for mm = 1:length(LMMOrder)
+    
+    if ~strcmp(LMMOrder{mm},'Data')
+        clear modelMat modelseMat
+        for ii = 1:length(roisToPlot)
+            if useSTRetParams
+                sj = unique(ds.Subject(ds.ROI==roisToPlot(ii)))';
+                sj2 = ismember(sj,[1:7]);
+                modelMat(:,ii) = mean(lmmResults(1).subjSlopes{mm,ii}(sj2,:),1,'omitnan');
+                modelseMat(:,ii) = std(lmmResults(1).subjSlopes{mm,ii}(sj2,:),[],1,'omitnan')./sqrt(length(sj2));
+            else
+                modelMat(:,ii) = lmmResults(1).fixedSlopes{mm,ii};
+                modelseMat(:,ii) = lmmResults(1).fixedSlopes_SE{mm,ii};
+            end
+        end
+    end
 
     for c = conditionOrderSimSeq
         subplot(1,4,subplotOrder(c)); hold all;
@@ -74,9 +94,9 @@ for mm = 1:length(LMMOrder)
                     curMnSlope   = lmmResults(1).fixedSlopes{mm,idx}(c);
                     SE           = lmmResults(1).fixedSlopes_SE{mm,idx}(c);
                     if mm==1
-                        scatter(idx,curMnSlope,100,cmap(mm,:),markerTypes{mm},'linewidth',0.15); hold on; %'MarkerEdgeColor',[0,0,0]
+                        scatter(idx,curMnSlope,100,cmap(mm,:),'o','linewidth',0.15); hold on; %'MarkerEdgeColor',[0,0,0]
                     else
-                        scatter(idx,curMnSlope,100,cmap(mm,:),markerTypes{mm}, 'filled','linewidth',0.15); hold on; %'MarkerEdgeColor',[0,0,0]
+                        scatter(idx,curMnSlope,100,cmap(mm,:),'o','filled','linewidth',0.15); hold on; %'MarkerEdgeColor',[0,0,0]
                     end
                     plot([idx, idx], curMnSlope + [-SE, SE],'color',cmap(mm,:), 'linewidth',2);
                     plot([idx, idx], curMnSlope + [-SE, SE],'color',[0 0 0], 'linewidth',0.5);
@@ -85,24 +105,15 @@ for mm = 1:length(LMMOrder)
         end
         title(sprintf('%s',conditionNamesSimSeq{c}))
         xlim([0.2 9.7]); ylim([0 1.31]); box off
-        set(gca,'XTick',1:9, 'XTickLabel',string(roisToPlot),'XTickLabelRotation',45)
-    end
-end
-
-if plotModelAmpl
-    for ii = 1:4
-        subplot(1,4,ii); ax = gca;
-        for kk = 1:3:(3*9)
-            ax.Children(kk).ZData = -10;
-        end
+        set(gca,'XTick',1:length(roisToPlot), 'XTickLabel',string(roisToPlot),'XTickLabelRotation',45)
     end
 end
 
 % Add legend and title
 l = gca;
 if plotModelAmpl
-    legend(l.Children([length(l.Children):-30:1]),LMMOrder, 'FontSize',9, 'Location','SouthWest'); legend boxoff
-    sgtitle(sprintf('Group Average Data vs Model: LMM regression slopes (Mean +/-SE)'))
+    legend(l.Children([length(l.Children):-30:1]),LMMOrder{1:3}, 'FontSize',9, 'Location','SouthWest'); legend boxoff
+    sgtitle(sprintf('Group Average Data vs Model: LMM regression slopes (Mean +/-SE)')
 else
     legend(l.Children([length(l.Children):-3:1]),string(roisToPlot), 'FontSize',9, 'Location','SouthWest'); legend boxoff
     sgtitle('Group Average Data: LMM regression slopes (Mean +/-SE)')
@@ -118,7 +129,9 @@ if saveFigs
     end
     
     % Set paths
-    saveFigDir = fullfile(simseqRootPath,'results','group');
+    if ~exist('saveFigDir','var')
+        saveFigDir = fullfile(simseqRootPath,'results','group');
+    end
     thisSaveFigDir = fullfile(saveFigDir, subDir);
     if ~exist(thisSaveFigDir,'dir'); mkdir(thisSaveFigDir); end
     saveas(gcf, fullfile(thisSaveFigDir, [fName '.png']))

@@ -1,12 +1,8 @@
-function fH = plotLMMregressionSlopes_v_pRFSize(lmmResults, resampled_medianPRFSz, roisToPlot, cmapROIs,saveFigs)
-
-conditionNamesSimSeq = {'Small & short (0.2s)','Small & long (1s)',...
-                        'Big & Short (0.2s)','Big & Long (1s)'};
+function fH = plotLMMregressionSlopes_v_pRFSize(lmmResults, resampled_medianPRFSz, roisToPlot, cmapROIs,saveFigs,saveFigDir)
 
 fH = figure; set(gcf,'Position',[889,294,963,604]); hold all;
 
 for idx = 1:length(roisToPlot)
-     
     currMnSz     = mean(resampled_medianPRFSz(:,idx),1,'omitnan');
     currSEMSz    = std(resampled_medianPRFSz(:,idx),[],1,'omitnan')./sqrt(sum(~isnan(resampled_medianPRFSz(:,idx))));
     grandMean = mean(lmmResults.fixedSlopes{idx}); % same as mean(mean(subjSlopes{idx},2)));
@@ -34,7 +30,7 @@ end
 % between group average condition slopes and pRF size
 mnCondSlopes = NaN(9,10);
 mnSz = mnCondSlopes;
-for idx = 1:9
+for idx = 1:length(roisToPlot)
     mnCondSlopes(idx,~isnan(resampled_medianPRFSz(:,idx))) = mean(lmmResults.subjSlopes{idx},2);
     mnSz(idx,:) = resampled_medianPRFSz(:,idx);
 end

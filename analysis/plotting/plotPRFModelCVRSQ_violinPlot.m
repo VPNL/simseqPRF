@@ -1,12 +1,10 @@
-function fH = plotPRFModelCVRSQ_violinPlot(ds,resampledCVR2,maxNC,roisToPlot,saveFigs)
+function fH = plotPRFModelCVRSQ_violinPlot(ds,resampledCVR2,maxNC,roisToPlot,saveFigs, saveFigDir)
 % Function to generate Violin plots with cross-validated variance explained
 % (R^2) for each pRF model,
 
 % Set colors
 cmapModels = getColormapPRFModels(0);
-cmapModels = cmapModels([3,2,1],:);
 modelNames = {'LSS','CSS','CST'};
-modelNames = modelNames([3,2,1]);
 
 fH = figure; clf; set(gcf,'Position',[500 1 965 950],'color','w');
 plIdx = 1;
@@ -43,9 +41,10 @@ for idx = 1:length(roisToPlot)
 end
 
 if saveFigs
-    saveFigDir = fullfile(simseqRootPath,'results','group');
-    subDir = 'fig6';
-    thisSaveFigDir = fullfile(saveFigDir, subDir);
+    if ~exist('saveFigDir','var')
+        saveFigDir = fullfile(simseqRootPath,'results','group');
+    end
+    thisSaveFigDir = fullfile(saveFigDir, 'fig6');
     if ~exist(thisSaveFigDir,'dir'); mkdir(thisSaveFigDir); end
     fName = 'R2Group_Gridfit2_ViolinPlotAllVoxels';
     saveas(gcf, fullfile(thisSaveFigDir, [fName '.png']))
