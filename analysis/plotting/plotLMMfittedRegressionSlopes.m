@@ -1,4 +1,4 @@
-function fH = plotLMMfittedRegressionSlopes(lmmResults,LMMOrder, roisToPlot,cmapROIs, useSTRetParams, saveFigs, saveFigDir)
+function fH = plotLMMfittedRegressionSlopes(ds,lmmResults,LMMOrder, roisToPlot,cmapROIs, useSTRetParams, saveFigs, saveFigDir)
 % Function to plot Linear Mixed Model fitted regression slopes (fixed and
 % random subject slopes, for each condition and visual area).
 % To plot Figure 4B, "LMMResults" struct has fields with size {1,nrROIs}
@@ -26,7 +26,11 @@ subplotOrder         = [2,1,4,3];
 conditionNamesSimSeq = {'Small & Short (0.2s)','Small & Long (1s)','Big & Short (0.2s)','Big & Long (1s)'};
 
 if plotModelAmpl
-    cmap = getColormapPRFModels(0);
+    if size(lmmResults,2)>1
+        cmap = getColormapPRFModels(0);
+    else % DoG model
+        cmap = getColormapPRFModels(2);
+    end
 else
     cmap = cmapROIs;
 end
@@ -93,7 +97,7 @@ for mm = 1:length(LMMOrder)
                 else
                     curMnSlope   = lmmResults(1).fixedSlopes{mm,idx}(c);
                     SE           = lmmResults(1).fixedSlopes_SE{mm,idx}(c);
-                    if mm==1
+                    if mm==1 && ~strcmp(LMMOrder{mm},'suppl_DoG')
                         scatter(idx,curMnSlope,100,cmap(mm,:),'o','linewidth',0.15); hold on; %'MarkerEdgeColor',[0,0,0]
                     else
                         scatter(idx,curMnSlope,100,cmap(mm,:),'o','filled','linewidth',0.15); hold on; %'MarkerEdgeColor',[0,0,0]
@@ -112,8 +116,12 @@ end
 % Add legend and title
 l = gca;
 if plotModelAmpl
-    legend(l.Children([length(l.Children):-30:1]),LMMOrder{1:3}, 'FontSize',9, 'Location','SouthWest'); legend boxoff
-    sgtitle(sprintf('Group Average Data vs Model: LMM regression slopes (Mean +/-SE)')
+    sgtitle('Group Average Data vs Model: LMM regression slopes (Mean +/-SE)');
+    if strcmp(LMMOrder{1},'suppl_DoG')
+        legend(l.Children([length(l.Children):-8:1]),LMMOrder{1:2}, 'FontSize',9, 'Location','SouthWest'); legend boxoff
+    else
+        legend(l.Children([length(l.Children):-30:1]),LMMOrder{1:3}, 'FontSize',9, 'Location','SouthWest'); legend boxoff
+    end
 else
     legend(l.Children([length(l.Children):-3:1]),string(roisToPlot), 'FontSize',9, 'Location','SouthWest'); legend boxoff
     sgtitle('Group Average Data: LMM regression slopes (Mean +/-SE)')
@@ -121,8 +129,13 @@ end
 
 if saveFigs
     if plotModelAmpl
-        fName = sprintf('SummarySlopeGroup_SEQvsSIMMODELAmpl%s_LMMfit',cell2mat(LMMOrder));
-        subDir     = 'fig7';
+        if strcmp(LMMOrder{1},'suppl_DoG')
+            fName = sprintf('SummarySlopeGroup_SEQvsSIMMODELAmpl%s_LMMfit',cell2mat(LMMOrder));
+            subDir = 'SupplFig7';
+        else
+            fName = sprintf('SummarySlopeGroup_SEQvsSIMMODELAmpl%s_LMMfit',cell2mat(LMMOrder));
+            subDir = 'fig7';
+        end
     else
         fName = sprintf('SummarySlopeGroup_SEQvsSIMAmpl_LMMfit');
         subDir     = 'fig4';

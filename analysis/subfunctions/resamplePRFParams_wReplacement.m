@@ -1,6 +1,4 @@
-function output = resamplePRFParams_wReplacement(ds, roisToPlot, ...
-    useSTRetParams, temporalModel, spatialModel, subjnrs)
-
+function output = resamplePRFParams_wReplacement(ds, roisToPlot, useSTRetParams, temporalModel, spatialModel, subjnrs)
 %% Accumulate and resample effective pRF size, CSS exponent, CST exponent, cv-R2
 
 % Define params
@@ -15,42 +13,22 @@ end
 if useSTRetParams
     allSubjnrs = [1:3,7:10];
 else
-    allSubjnrs = [1:3,7:13];
+    allSubjnrs  = [1:3,7:13];
 end
 nboot       = 1000; % nr of bootstraps for resampling
 bins = linspace(0,nboot,50);
 
+% Allocate space for pRF median
 if useSTRetParams
-    
-    % Allocate space for pRF parameters
-    medianPRFSz           = NaN(length(subjnrs),length(roisToPlot));
-    resampledPRFSz        = NaN(length(subjnrs),length(roisToPlot),nboot);
-    resampledCSSExp       = NaN(length(subjnrs),length(roisToPlot),nboot);
-    resampledCSTExp       = NaN(length(subjnrs),length(roisToPlot),nboot);
-    resampledBetavalSust  = NaN(length(subjnrs),length(roisToPlot),nboot);
-    resampledBetavalTrans = NaN(length(subjnrs),length(roisToPlot),nboot);
-    resampledCVR2         = NaN(length(subjnrs),length(roisToPlot),3,nboot);
-    diff_resampledCVR2    = NaN(length(subjnrs),length(roisToPlot),3,nboot);
-    
-    % Resampled Data Median
-    median_resampledPRFSz      = NaN(length(subjnrs),length(roisToPlot));
-    median_resampledCSSExp     = NaN(length(subjnrs),length(roisToPlot));
-    median_resampledCSTExp     = NaN(length(subjnrs),length(roisToPlot));
-    mean_resampledBetavalSust  = NaN(length(subjnrs),length(roisToPlot));
-    mean_resampledBetavalTrans = NaN(length(subjnrs),length(roisToPlot));
-    mean_diffCVR2              = NaN(length(subjnrs),length(roisToPlot),3);
-    
-    % Max noise ceiling (NC) -- split-half-correlation
-    maxNC = NaN(length(subjnrs),length(roisToPlot));
-
-    allCVR2  = cell(length(subjnrs),length(roisToPlot),3);
-    diffCVR2 = allCVR2;
-    
+    % Sample median & resampled Data
+    medianPRFSz     = NaN(length(subjnrs),length(roisToPlot));
+    resampledPRFSz  = NaN(length(subjnrs),length(roisToPlot),nboot);
+    resampledCVR2   = NaN(length(subjnrs),length(roisToPlot),nboot);
     
     if strcmp(temporalModel,'3ch-stLN')
-        medianCSTExp    = NaN(length(subjnrs),length(roisToPlot));
-        medianCSSExp    = NaN(length(subjnrs),length(roisToPlot));
-        modeCST_tau     = NaN(length(subjnrs),length(roisToPlot));
+        medianCST_exp         = NaN(length(subjnrs),length(roisToPlot));
+        medianCST_tau         = NaN(length(subjnrs),length(roisToPlot));
+        modeCST_tau           = NaN(length(subjnrs),length(roisToPlot));
         resampledCST_exp      = NaN(length(subjnrs),length(roisToPlot),nboot);
         resampledCST_tau      = NaN(length(subjnrs),length(roisToPlot),nboot);
         resampledBetavalSust  = NaN(length(subjnrs),length(roisToPlot),nboot);
@@ -84,55 +62,56 @@ if useSTRetParams
         mean_resampledBetaval           = NaN(length(subjnrs),length(roisToPlot));
     end
     
-    
+    % Max noise ceiling (NC) -- split-half-correlation
+    maxNC = NaN(length(subjnrs),length(roisToPlot));
     
     for idx = 1:length(roisToPlot)
         for sj = 1:length(subjnrs)
             if strcmp(temporalModel,'3ch-stLN')
                 if any(ismember(ds.Properties.VarNames,'pRFCSTsize'))
-                    szCST{sj,idx} = ds.pRFCSTsize(ds.Subject==(subjnrs(sj)) & ...
+                    szCST{sj,idx} = ds.pRFCSTsize(ds.Subject==sj & ...
                         ds.ROI==nominal(roisToPlot(idx)) & ...
                         ds.Condition==nominal(1));
-                    expCSS{sj,idx} = ds.pRFCSSexp(ds.Subject==(subjnrs(sj)) & ...
+                    expCSS{sj,idx} = ds.pRFCSSexp(ds.Subject==sj & ...
                         ds.ROI==nominal(roisToPlot(idx)) & ...
                         ds.Condition==nominal(1));
-                    expCST{sj,idx} = ds.pRFCSTexp(ds.Subject==(subjnrs(sj)) & ...
+                    expCST{sj,idx} = ds.pRFCSTexp(ds.Subject==sj & ...
                         ds.ROI==nominal(roisToPlot(idx)) & ...
                         ds.Condition==nominal(1));
-                    cst{sj,idx} = 100.*ds.R2CST(ds.Subject==(subjnrs(sj)) & ...
+                    cst{sj,idx} = 100.*ds.R2CST(ds.Subject==sj & ...
                         ds.ROI==nominal(roisToPlot(idx)) & ...
                         ds.Condition==nominal(1));
                     tauCST{sj,idx} = [];
                     % SUSTAINED & TRANSIENT BETA WEIGHTS
-                    beta_s{sj,idx} = ds.BetaCST_s(ds.Subject==(subjnrs(sj)) & ...
-                        ds.ROI==nominal(roisToPlot(idx)) & ...
-                        ds.Condition==nominal(1));
-                    beta_t{sj,idx} = ds.BetaCST_t(ds.Subject==(subjnrs(sj)) & ...
-                        ds.ROI==nominal(roisToPlot(idx)) & ...
-                        ds.Condition==nominal(1));
+                     beta_s{sj,idx} = ds.BetaCST_s(ds.Subject==sj & ...
+                         ds.ROI==nominal(roisToPlot(idx)) & ...
+                         ds.Condition==nominal(1));
+                     beta_t{sj,idx} = ds.BetaCST_t(ds.Subject==sj & ...
+                         ds.ROI==nominal(roisToPlot(idx)) & ...
+                         ds.Condition==nominal(1));
                 elseif any(ismember(ds.Properties.VarNames,'pRFCST_ST_size'))
-                    szCST{sj,idx} = ds.pRFCST_ST_size(ds.Subject==(subjnrs(sj)) & ...
+                    szCST{sj,idx} = ds.pRFCST_ST_size(ds.Subject==sj & ...
                         ds.ROI==nominal(roisToPlot(idx)) & ...
                         ds.Condition==nominal(1));
-                    expCST{sj,idx} = ds.pRFCST_ST_exp(ds.Subject==(subjnrs(sj)) & ...
+                    expCST{sj,idx} = ds.pRFCST_ST_exp(ds.Subject==sj & ...
                         ds.ROI==nominal(roisToPlot(idx)) & ...
                         ds.Condition==nominal(1));
-                    tauCST{sj,idx} = ds.pRFCST_ST_tau(ds.Subject==(subjnrs(sj)) & ...
+                    tauCST{sj,idx} = ds.pRFCST_ST_tau(ds.Subject==sj & ...
                         ds.ROI==nominal(roisToPlot(idx)) & ...
                         ds.Condition==nominal(1));
-                    cst{sj,idx} = 100.*ds.R2CST_ST(ds.Subject==(subjnrs(sj)) & ...
+                    cst{sj,idx} = 100.*ds.R2CST_ST(ds.Subject==sj & ...
                         ds.ROI==nominal(roisToPlot(idx)) & ...
                         ds.Condition==nominal(1));
-                    % SUSTAINED & TRANSIENT BETA WEIGHTS
-                    beta_s{sj,idx} = ds.BetaCST_ST_s(ds.Subject==(subjnrs(sj)) & ...
-                        ds.ROI==nominal(roisToPlot(idx)) & ...
-                        ds.Condition==nominal(1));
-                    beta_t{sj,idx} = ds.BetaCST_ST_t(ds.Subject==(subjnrs(sj)) & ...
-                        ds.ROI==nominal(roisToPlot(idx)) & ...
-                        ds.Condition==nominal(1));
+                     % SUSTAINED & TRANSIENT BETA WEIGHTS
+                     beta_s{sj,idx} = ds.BetaCST_ST_s(ds.Subject==sj & ...
+                         ds.ROI==nominal(roisToPlot(idx)) & ...
+                         ds.Condition==nominal(1));
+                     beta_t{sj,idx} = ds.BetaCST_ST_t(ds.Subject==sj & ...
+                         ds.ROI==nominal(roisToPlot(idx)) & ...
+                         ds.Condition==nominal(1));
                 end
-                
-                nc{sj,idx} = 100.*ds.NC(ds.Subject==(subjnrs(sj)) & ...
+                    
+                nc{sj,idx} = 100.*ds.NC(ds.Subject==sj & ...
                     ds.ROI==nominal(roisToPlot(idx)) & ...
                     ds.Condition==nominal(1));
                 
@@ -157,7 +136,7 @@ if useSTRetParams
                         mode_resampledCST_tau(sj,idx,:) = xi(tauMode_idx);
                     end
                 end
-                
+
                 if ~isempty(cst{sj,idx})
                     resampledCVR2(sj,idx,:) = randsample(cst{sj,idx}, 1000, true);
                     maxNC(sj,idx) = max(nc{sj,idx},[], 'omitnan');
@@ -173,22 +152,22 @@ if useSTRetParams
                     mean_resampledBetavalTrans(sj,idx) = mean(squeeze(resampledBetavalTrans(sj, idx,:)),'omitnan');
                 end
                 
-                
+
             elseif strcmp(temporalModel,'1ch-dcts')
-                
-                szDNST{sj,idx} = ds.pRFDN_ST_size(ds.Subject==(subjnrs(sj)) & ...
+               
+                szDNST{sj,idx} = ds.pRFDN_ST_size(ds.Subject==sj & ...
                     ds.ROI==nominal(roisToPlot(idx)) & ...
                     ds.Condition==nominal(1));
-                nDNST{sj,idx} = ds.pRFDN_ST_n(ds.Subject==(subjnrs(sj)) & ...
+                nDNST{sj,idx} = ds.pRFDN_ST_n(ds.Subject==sj & ...
                     ds.ROI==nominal(roisToPlot(idx)) & ...
                     ds.Condition==nominal(1));
-                tau1DNST{sj,idx} = ds.pRFDN_ST_tau1(ds.Subject==(subjnrs(sj)) & ...
+                tau1DNST{sj,idx} = ds.pRFDN_ST_tau1(ds.Subject==sj & ...
                     ds.ROI==nominal(roisToPlot(idx)) & ...
                     ds.Condition==nominal(1));
-                tau2DNST{sj,idx} = ds.pRFDN_ST_tau2(ds.Subject==(subjnrs(sj)) & ...
+                tau2DNST{sj,idx} = ds.pRFDN_ST_tau2(ds.Subject==sj & ...
                     ds.ROI==nominal(roisToPlot(idx)) & ...
                     ds.Condition==nominal(1));
-                semisatDNST{sj,idx} = ds.pRFDN_ST_semisat(ds.Subject==(subjnrs(sj)) & ...
+                semisatDNST{sj,idx} = ds.pRFDN_ST_semisat(ds.Subject==sj & ...
                     ds.ROI==nominal(roisToPlot(idx)) & ...
                     ds.Condition==nominal(1));
                 
@@ -198,13 +177,13 @@ if useSTRetParams
                     medianDNST_tau1(sj,idx)    = median(tau1DNST{sj,idx},'omitnan');
                     medianDNST_tau2(sj,idx)    = median(tau2DNST{sj,idx},'omitnan');
                     medianDNST_semisat(sj,idx) = median(semisatDNST{sj,idx},'omitnan');
-                    
+
                     resampledPRFSz(sj,idx,:)        = randsample(szDNST{sj,idx}, nboot, true);
                     resampledDNST_n(sj,idx,:)      = randsample(nDNST{sj,idx}, nboot, true);
                     resampledDNST_tau1(sj,idx,:)   = randsample(tau1DNST{sj,idx}, nboot, true);
                     resampledDNST_tau2(sj,idx,:)   = randsample(tau2DNST{sj,idx}, nboot, true);
                     resampledDNST_semisat(sj,idx,:)= randsample(semisatDNST{sj,idx}, nboot, true);
-                    
+
                     
                     median_resampledPRFSz(sj,idx,:)         = median(squeeze(resampledPRFSz(sj,idx,:)),'omitnan');
                     median_resampledDNST_n(sj,idx,:)       = median(squeeze(resampledDNST_n(sj,idx,:)),'omitnan');
@@ -213,11 +192,11 @@ if useSTRetParams
                     median_resampledDNST_semisat(sj,idx,:) = median(squeeze(medianDNST_semisat(sj,idx,:)),'omitnan');
                 end
                 
-                dnst{sj,idx} = 100.*ds.R2DN_ST(ds.Subject==(subjnrs(sj)) & ...
+                dnst{sj,idx} = 100.*ds.R2DN_ST(ds.Subject==sj & ...
                     ds.ROI==nominal(roisToPlot(idx)) & ...
                     ds.Condition==nominal(1));
                 
-                nc{sj,idx} = 100.*ds.NC(ds.Subject==(subjnrs(sj)) & ...
+                nc{sj,idx} = 100.*ds.NC(ds.Subject==sj & ...
                     ds.ROI==nominal(roisToPlot(idx)) & ...
                     ds.Condition==nominal(1));
                 
@@ -231,7 +210,7 @@ if useSTRetParams
                 
                 
                 %% BETA WEIGHT
-                betaval{sj,idx} = ds.BetaDN_ST_s(ds.Subject==(subjnrs(sj)) & ...
+                betaval{sj,idx} = ds.BetaDN_ST_s(ds.Subject==sj & ...
                     ds.ROI==nominal(roisToPlot(idx)) & ...
                     ds.Condition==nominal(1));
                 
@@ -240,7 +219,7 @@ if useSTRetParams
                     
                     mean_resampledBetaval(sj,idx) = mean(squeeze(resampledBetaval(sj, idx,:)),'omitnan');
                 end
-                
+            
             end
         end
     end
@@ -268,7 +247,7 @@ if useSTRetParams
         output.mean_resampledBetavalTrans = mean_resampledBetavalTrans;
         output.resampledBetavalSust = resampledBetavalSust;
         output.resampledBetavalTrans = resampledBetavalTrans;
-        
+    
     elseif strcmp(temporalModel,'1ch-dcts')
         output.szDNST          = szDNST;
         output.expDNST         = nDNST;
@@ -288,7 +267,7 @@ if useSTRetParams
         output.resampledDNST_tau2      = resampledDNST_tau2;
         output.resampledDNST_semisat   = resampledDNST_semisat;
     end
-    
+
 elseif strcmp(spatialModel,'differenceOfGaussiansFit')
     medianPRFSz_center     = NaN(length(subjnrs),length(roisToPlot));
     resampledPRFSz_center  = NaN(length(subjnrs),length(roisToPlot),nboot);
@@ -304,40 +283,40 @@ elseif strcmp(spatialModel,'differenceOfGaussiansFit')
     
     for idx = 1:length(roisToPlot)
         for sj = 1:length(subjnrs)
+    
+        szCenter{sj,idx} = ds.pRF_sizeCenter(ds.Subject==sj & ...
+            ds.ROI==nominal(roisToPlot(idx)) & ...
+            ds.Condition==nominal(1));
+        szSurround{sj,idx} = ds.pRF_sizeSurround(ds.Subject==sj & ...
+            ds.ROI==nominal(roisToPlot(idx)) & ...
+            ds.Condition==nominal(1));
+        
+        if ~isempty(szCenter{sj,idx})
+            medianPRFSz_center(sj,idx)        = median(szCenter{sj,idx},'omitnan');
+            medianPRFSz_surround(sj,idx)      = median(szSurround{sj,idx},'omitnan');
             
-            szCenter{sj,idx} = ds.pRF_sizeCenter(ds.Subject==sj & ...
-                ds.ROI==nominal(roisToPlot(idx)) & ...
-                ds.Condition==nominal(1));
-            szSurround{sj,idx} = ds.pRF_sizeSurround(ds.Subject==sj & ...
-                ds.ROI==nominal(roisToPlot(idx)) & ...
-                ds.Condition==nominal(1));
+            resampledPRFSz_center(sj,idx,:)   = randsample(szCenter{sj,idx}, nboot, true);
+            resampledPRFSz_surround(sj,idx,:) = randsample(szSurround{sj,idx}, nboot, true);
             
-            if ~isempty(szCenter{sj,idx})
-                medianPRFSz_center(sj,idx)        = median(szCenter{sj,idx},'omitnan');
-                medianPRFSz_surround(sj,idx)      = median(szSurround{sj,idx},'omitnan');
-                
-                resampledPRFSz_center(sj,idx,:)   = randsample(szCenter{sj,idx}, nboot, true);
-                resampledPRFSz_surround(sj,idx,:) = randsample(szSurround{sj,idx}, nboot, true);
-                
-                median_resampledPRFSz_center(sj,idx,:)   = median(squeeze(resampledPRFSz_center(sj,idx,:)),'omitnan');
-                median_resampledPRFSz_surround(sj,idx,:) = median(squeeze(resampledPRFSz_surround(sj,idx,:)),'omitnan');
-            end
-            
-            % Cross-validated R2
-            dog{sj,idx} = 100.*ds.R2DoG(ds.Subject==sj & ...
-                ds.ROI==nominal(roisToPlot(idx)) & ...
-                ds.Condition==nominal(1));
-            
-            betaval{sj,idx} = ds.BetaDoG(ds.Subject==sj & ...
-                ds.ROI==nominal(roisToPlot(idx)) & ...
-                ds.Condition==nominal(1));
-            
-            resampledCVR2(sj,idx,:) = randsample(dog, nboot, true);
-            
-            if ~isempty(betaval{sj,idx}) || length(betaval{sj,idx}) > 1
-                resampledBetaval(sj, idx,:) = randsample(betaval{sj,idx}, nboot, true);
-                mean_resampledBetaval(sj,idx) = mean(squeeze(resampledBetaval(sj, idx,:)),'omitnan');
-            end
+            median_resampledPRFSz_center(sj,idx,:)   = median(squeeze(resampledPRFSz_center(sj,idx,:)),'omitnan');
+            median_resampledPRFSz_surround(sj,idx,:) = median(squeeze(resampledPRFSz_surround(sj,idx,:)),'omitnan');
+        end
+        
+        % Cross-validated R2
+        dog{sj,idx} = 100.*ds.R2DoG(ds.Subject==find(subjnrs(sj)==allSubjnrs) & ...
+            ds.ROI==nominal(roisToPlot(idx)) & ...
+            ds.Condition==nominal(1));
+        
+        betaval{sj,idx} = ds.BetaDoG(ds.Subject==find(subjnrs(sj)==allSubjnrs) & ...
+            ds.ROI==nominal(roisToPlot(idx)) & ...
+            ds.Condition==nominal(1));
+
+        resampledCVR2(sj,idx,:) = randsample(dog{sj,idx}, nboot, true);
+        
+        if ~isempty(betaval{sj,idx}) || length(betaval{sj,idx}) > 1
+            resampledBetaval(sj, idx,:) = randsample(betaval{sj,idx}, nboot, true);            
+            mean_resampledBetaval(sj,idx) = mean(squeeze(resampledBetaval(sj, idx,:)),'omitnan');
+        end
         end
     end
     
@@ -404,9 +383,9 @@ else
                 resampledCSTExp(sj,idx,:) = randsample(expCST{sj,idx}, nboot, true);
                 resampledCSSExp(sj,idx,:) = randsample(expCSS{sj,idx}, nboot, true);
                 
-                median_resampledPRFSz(sj,idx) = median(squeeze(resampledPRFSz(sj,idx,:)),'omitnan');
-                median_resampledCSTExp(sj,idx) = median(squeeze(resampledCSTExp(sj,idx,:)),'omitnan');
-                median_resampledCSSExp(sj,idx) = median(squeeze(resampledCSSExp(sj,idx,:)),'omitnan');
+                median_resampledPRFSz(sj,idx,:) = median(squeeze(resampledPRFSz(sj,idx,:)),'omitnan');
+                median_resampledCSTExp(sj,idx,:) = median(squeeze(resampledCSTExp(sj,idx,:)),'omitnan');
+                median_resampledCSSExp(sj,idx,:) = median(squeeze(resampledCSSExp(sj,idx,:)),'omitnan');
             end
             
             %% Cross-validated R2
@@ -492,15 +471,19 @@ else
     output.NC           = nc;
     output.beta_s       = beta_s;
     output.beta_t       = beta_t;
-    output.median_resampledPRFSz      = median_resampledPRFSz;
-    output.median_resampledCSSExp     = median_resampledCSSExp;
-    output.median_resampledCSTExp     = median_resampledCSTExp;
-    output.mean_resampledBetavalSust  = mean_resampledBetavalSust;
+    output.median_resampledPRFSz     = median_resampledPRFSz;
+    output.median_resampledCSSExp    = median_resampledCSSExp;
+    output.median_resampledCSTExp    = median_resampledCSTExp;
+    output.mean_resampledBetavalSust = mean_resampledBetavalSust;
     output.mean_resampledBetavalTrans = mean_resampledBetavalTrans;
-    output.resampledCVR2      = resampledCVR2;
+    output.resampledCVR2 = resampledCVR2;
     output.diff_resampledCVR2 = diff_resampledCVR2;
-    output.mean_diffCVR2      = mean_diffCVR2;
-    output.maxNC              = maxNC;
+    output.mean_diffCVR2 = mean_diffCVR2;
+    output.maxNC = maxNC;
     
 end
+
+
+
+
 

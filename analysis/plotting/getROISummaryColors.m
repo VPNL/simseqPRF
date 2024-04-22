@@ -8,10 +8,10 @@ switch type
             142, 189, 228; ... % V3: Light blue
             15,104,53; ... % hV4: Dark green
             132,197, 81; ... % VO1/2: Light green
-            213, 77, 40; ... % LO1/2: Red/orange
-            213, 183, 24; ... % TO1/2: dark yellow
             120, 91, 167; ... % V3AB: Dark purlple
-            207, 162, 203]./256; % IPS0/1: light purlple
+            207, 162, 203; % IPS0/1: light purlple
+            213, 77, 40; ... % LO1/2: Red/orange
+            213, 183, 24]./256; ... % TO1/2: dark yellow
         colors2 = [];
     case 1
         satValues = 1-linspace(0,0.9,4);

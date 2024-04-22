@@ -45,22 +45,38 @@ if strcmp(hemi, 'both')
         x0 = cat(2,prfData.lh.x0,prfData.rh.x0);
         y0 = cat(2,prfData.lh.y0,prfData.rh.y0);
         sz = cat(2,prfData.lh.effectiveSize,prfData.rh.effectiveSize);
+        if isfield(prfData.lh,'sigmaSurround') || isfield(prfData.rh,'sigmaSurround')
+            sz_c = cat(2,prfData.lh.sigmaMajor,prfData.rh.sigmaMajor);
+            sz_s = cat(2,prfData.lh.sigmaSurround,prfData.rh.sigmaSurround);
+        end
     else
         x0 = prfData.x0;
         y0 = prfData.y0;
         sz = prfData.effectiveSize;
         voxelsToPlot = 1:length(sz);
+        if isfield(prfData,'sigmaSurround')
+            sz_c = prfData.sigmaMajor;
+            sz_s = prfData.sigmaSurround;
+        end
     end
 elseif strcmp(hemi, 'lh')
     voxelsToPlot = 1:size(prfData.lh.x0,2);
     x0 = prfData.lh.x0;
     y0 = prfData.lh.y0;
     sz = prfData.lh.effectiveSize;
+    if isfield(prfData.lh,'sigmaSurround')
+        sz_c = prfData.lh.sigmaMajor;
+        sz_s = prfData.lh.sigmaSurround;
+    end
 elseif strcmp(hemi,'rh')
     voxelsToPlot = 1:size(prfData.rh.x0,2);
     x0 = prfData.rh.x0;
     y0 = prfData.rh.y0;
     sz = prfData.rh.effectiveSize;
+    if isfield(prfData.rh,'sigmaSurround')
+        sz_c = prfData.rh.sigmaMajor;
+        sz_s = prfData.rh.sigmaSurround;
+    end
 end
 
 if ~isempty(mask)
@@ -85,10 +101,21 @@ for vv = voxelsToPlot
 %         'MarkerFaceColor',[1 1 .5],...
 %         'MarkerFaceAlpha',alpha, ...
 %         'LineWidth',0.5)
-     rectangle('Position',[x0(vv)-((radiusToPlot*sz(vv))/2),...
-            y0(vv)-((radiusToPlot*sz(vv))/2),...
-            radiusToPlot*sz(vv),radiusToPlot*sz(vv)], 'Curvature',[1 1], ...
-            'EdgeColor',[0 0 0], 'FaceColor',[1 1 .5 alpha]);
+        if exist('sz_s','var')
+            rectangle('Position',[x0(vv)-((radiusToPlot*sz_s(vv))/2),...
+                y0(vv)-((radiusToPlot*sz_s(vv))/2),...
+                radiusToPlot*sz_s(vv),radiusToPlot*sz_s(vv)], 'Curvature',[1 1], ...
+                'EdgeColor',[0 0 0], 'FaceColor',[1 0 0 alpha]); hold on;
+            rectangle('Position',[x0(vv)-((radiusToPlot*sz_c(vv))/2),...
+                y0(vv)-((radiusToPlot*sz_c(vv))/2),...
+                radiusToPlot*sz_c(vv),radiusToPlot*sz_c(vv)], 'Curvature',[1 1], ...
+                'EdgeColor',[0 0 0], 'FaceColor',[1 1 .5 alpha]);
+        else
+            rectangle('Position',[x0(vv)-((radiusToPlot*sz(vv))/2),...
+                y0(vv)-((radiusToPlot*sz(vv))/2),...
+                radiusToPlot*sz(vv),radiusToPlot*sz(vv)], 'Curvature',[1 1], ...
+                'EdgeColor',[0 0 0], 'FaceColor',[1 1 .5 alpha]);
+        end
     end
     xlim(xylim); ylim(xylim);
 end
