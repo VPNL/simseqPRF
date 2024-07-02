@@ -1,13 +1,15 @@
 function [] = downloadDataTableFromOSF(dataType, varargin)
 % Function to download data presented in the paper:
-% "Rethinking simultaneous suppression in visual cortex via compressive
-%   spatiotemporal population receptive fields."
-% by Kupers, Kim, Grill-Spector (2024).
-% Journal: bioRxiv
-% DOI: https://doi.org/10.1101/2023.06.24.546388
+% Title:   Rethinking simultaneous suppression in visual cortex via 
+%          compressive spatiotemporal population receptive fields.
+% Authors: Kupers, Kim, Grill-Spector (2024).
+% Journal: Nature Communications
+% DOI:     XXX
 %
 % Main OSF storage URL: https://osf.io/rpuhs/
 % Supplemental OSF storage URL: https://osf.io/e83az/
+%
+% Code written by E.R. Kupers (2024) Stanford University
 %
 % Subjects 1 through 10 have the following labels:
 % subj01, subj02, subj03, subj07, subj08 subj09, subj10, subj11, subj12, subj13.
@@ -30,7 +32,7 @@ function [] = downloadDataTableFromOSF(dataType, varargin)
 % Examples:
 %   downloadDataTableFromOSF(9, 'subjToLoad', 3)
 
-% Parse inputs
+%% Parse inputs
 p = inputParser;
 p.addRequired('dataType', @isnumeric);
 p.addParameter('subjToLoad', 3, @isnumeric); % Subject nrs: 1-10, corresponding to subj[1,2,3,7,8,9,10,11,12,13]
@@ -152,14 +154,13 @@ switch dataType
             websave(writePth,readPth);
             unzip(writePth,fullfile(writeDir,subjStr{subjToLoad(s)}))
         end
-        
     case 9 % stRet suppl material: Subject's preproc and model time series
         fprintf('stRet suppl material: Subject''s time series and modelfits..')
         dataStr = {'tv572','at372','pg7j4','ek6tn','vuwn5',... s1-s5
             'n4th5','fa4jg'}; % s6, s7
-        modelStrCSTfix = {'mxe8j', 'py64c','h58uw','kf25c','s6h2e',... s1-s5
+        modelStrCSTfix = {'mxe8j', 'py64c','9jb5c','kf25c','s6h2e',... s1-s5
             't9gru', '3t78s'}; % s6, s7
-        modelStrCSTopt = {'werfc', '2j8r3','fvgue','8nmz6','tm4qx',... s1-s5
+        modelStrCSTopt = {'werfc', '2j8r3','jtm5q','8nmz6','tm4qx',... s1-s5
             'ub5j8', 'rtxmy'}; % s6, s7
         modelStrDNST = {'fprza', '84m6x','q6ybv','qpbez','n37yb',... s1-s5
             'xcuqt', '79mcu'}; % s6, s7
@@ -185,7 +186,7 @@ switch dataType
                         versionNr = 1;
                 end
                 readPth = fullfile(urlBase,loadStr,sprintf('?action=download&version=%d',versionNr));
-                writePth = fullfile(writeDir,fName);
+                writePth = fullfile(writeDir,subjStr{subjToLoad(s)},fName);
                 websave(writePth,readPth);
                 unzip(writePth,fullfile(writeDir,subjStr{subjToLoad(s)}))
             end

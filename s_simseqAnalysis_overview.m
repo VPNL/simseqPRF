@@ -1,10 +1,19 @@
 %% s_simseqAnalysis_overview
+% Script to rerun data analyses in the paper:
+% Title:   Rethinking simultaneous suppression in visual cortex via 
+%          compressive spatiotemporal population receptive fields.
+% Authors: Kupers, Kim, Grill-Spector (2024).
+% Journal: Nature Communications
+% DOI:     XXX
 %
-% Requires getting MRI data from flywheel, 
-% renaming files using "renameFiles_flywheel2oak"
-% Preprocess toonotopy data + pRF model using toon_workflow.m
+% Requires getting MRI data from OSF (see downloadDataTableFromOSF.m)
+%
+% Code written by E.R. Kupers (2024) Stanford University
 
-%% Step 1: Raw data (nifti) to mrVista gray
+%% Step 0: Preprocess toonotopy data + estimate linear/CSS pRF models 
+% toon_workflow.m
+
+%% Step 1: Raw SEQ-SIM data (nifti) to mrVista gray
 % simseq_preprocess_workflow_raw_to_gray
 
 %% Step 3: Prepare data for modelfits -- make ROIS and concatenate parfiles
@@ -22,5 +31,17 @@
 %% Step 7: Find best R2 for exponent grid fit
 % s_selectBestGridFitExp
 
+%% Step 8: Summarize and prepare data for plotting
+% s_prepareDataForPlotting.m
+
+% For supplementary analyses:
+% s_prepareSTRetDataForPlotting.m
+
 %% Step 9: Visualize
 % s_makeAllManuscriptFigures
+
+
+
+%% Simulate difference of gaussian (DoG) pRF time series
+% s_simulateDoGPRFTimeSeries.m
+

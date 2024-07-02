@@ -1,7 +1,36 @@
 function fH = makeFigure4_SuppressionLevelsAcrossVisualAreas(ds,lmmResults, ...
             roisToPlot, cmapROIs, useSTRetParams, saveFigs, saveFigDir)
+% Function to reproduce main manuscript figure 4: 
+% panel a: All 9 ROIs SEQ vs SIM amplitude voxel scatter plot for small & short stimulus condition
+% panel b: Suppression level (LMM  slopes) vs ROI vs stimulus condition
+%
+% From the paper:
+% Title:   Rethinking simultaneous suppression in visual cortex via 
+%          compressive spatiotemporal population receptive fields.
+% Authors: Kupers, Kim, Grill-Spector (2024).
+% Journal: Nature Communications
+% DOI:     XXX
+%
+% Requires getting MRI data from OSF (see downloadDataTableFromOSF.m)
+%
+% Code written by E.R. Kupers (2024) Stanford University
+% 
+% INPUTS (required):
+% - ds              : dataset
+% - lmmResults      : cell (1x number of ROIs), containing a struct with fields:
+%                       fixedIntercepts, fixedSlopes, 
+%                       fixedIntercepts_CI, fixedSlopes_CI
+% - roisToPlot      : cell with ROI names
+% - cmapROIs        : color map for ROIs
+% - useSTRetParams  : (boolean) are we using supplementary spatiotemporal
+%                               retinotopy data or not?
+% - saveFigs        : save figures or not?
+% - saveFigDir      : folder to save figures
+%
+% OUTPUTS:
+% - fH         : figure handle
 
-% Check inputs
+%% Check inputs
 if isempty(cmapROIs) || ~exist('cmapROIs','var')
     cmapROIs = getROISummaryColors(0);
 end
@@ -46,5 +75,8 @@ T_ANOVA_slopeXroi = table(allROISlopes(:),conditionT(:),roiT(:),subjectT(:),...
 WithinSubjectsT = table([1:10],'VariableNames',{'Subjects'});
 rmANOVA_slopeXroi_within = fitrm(T_ANOVA_slopeXroi,'Slope~Condition*ROI',...
                 'WithinDesign',WithinSubjectsT,'WithinModel','separatemeans');
-rmANOVA_slopeXroi_within.anova
-rmANOVA_slopeXroi_within.multcompare('Condition','By','ROI','ComparisonType','Bonferroni')
+rm_anova  = rmANOVA_slopeXroi_within.anova
+rm_multcp = rmANOVA_slopeXroi_within.multcompare('Condition','By','ROI','ComparisonType','Bonferroni')
+
+% grpstat_ROI = grpstats(rmANOVA_slopeXroi_within,'ROI',{'mean','std','meanci','var'});
+

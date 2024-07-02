@@ -1,5 +1,34 @@
 function fH = makeFigure7_PredictedSuppressionLevels(lmmResults, lmmResults_Model,roisToPlot,cmapROIs,saveFigs,saveFigDir)
-
+% Function to reproduce main manuscript figure 7: 
+% Suppression level (LMM  slopes) vs model-based (predicted) suppression
+% level by each pRF model (LSS,CSS,CST)
+%
+% From the paper:
+% Title:   Rethinking simultaneous suppression in visual cortex via 
+%          compressive spatiotemporal population receptive fields.
+% Authors: Kupers, Kim, Grill-Spector (2024).
+% Journal: Nature Communications
+% DOI:     XXX
+%
+% Requires getting MRI data from OSF (see downloadDataTableFromOSF.m)
+%
+% Code written by E.R. Kupers (2024) Stanford University
+% 
+% INPUTS (required):
+% - lmmResults       : DATA cell (1x number of ROIs), containing a struct with fields:
+%                       fixedIntercepts, fixedSlopes, 
+%                       fixedIntercepts_CI, fixedSlopes_CI
+% - lmmResults_Model : MODELS cell (3x number of ROIs), containing a struct with fields:
+%                       fixedIntercepts, fixedSlopes, 
+%                       fixedIntercepts_CI, fixedSlopes_CI
+% - roisToPlot       : cell with ROI names
+% - cmapROIs         : color map for ROIs
+% - saveFigs         : save figures or not?
+% - saveFigDir       : folder to save figures
+%
+% OUTPUTS:
+% - fH         : figure handle
+%
 %% Plot predicted regression slopes
 all_lmmResults = cat(1,lmmResults_Model,lmmResults);
 

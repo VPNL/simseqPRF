@@ -1,4 +1,30 @@
 function fH = makeFigure6_PRFModelFits(ds,roisToPlot,spatialModel,temporalModel,saveFigs, saveFigDir)
+% Function to reproduce main manuscript figure 6: 
+% panel a/b: V1 & VO1 time series + LSS, CSS, CST model prediction for each stimulus condition 
+% panel c: violin plots showing cross-validated R^2 for LSS, CSS, CST models
+% panel d: bar graph showing difference in cross-validated R^2 for LSS, CSS, CST models
+%
+% From the paper:
+% Title:   Rethinking simultaneous suppression in visual cortex via 
+%          compressive spatiotemporal population receptive fields.
+% Authors: Kupers, Kim, Grill-Spector (2024).
+% Journal: Nature Communications
+% DOI:     XXX
+%
+% Requires getting MRI data from OSF (see downloadDataTableFromOSF.m)
+%
+% Code written by E.R. Kupers (2024) Stanford University
+% 
+% INPUTS (required):
+% - ds              : dataset
+% - roisToPlot      : cell with ROI names
+% - spatialModel    : spatial components of pRF models
+% - temporalModel   : temporal components of pRF models
+% - saveFigs        : save figures or not?
+% - saveFigDir      : folder to save figures
+%
+% OUTPUTS:
+% - fH         : figure handle
 
 %% Panel A: Plot V1 voxel time series + predicted pRF response per condition
 projectDir  = fullfile(simseqRootPath);
@@ -23,9 +49,8 @@ fH(4) = plotDiffPRFModelCVR2_bargraph(output.mean_diffCVR2,roisToPlot,saveFigs, 
 
 %% Do some statistics (ANOVA)
 
-% Do we want to adjust for the nr of regressors in pRF models (CST having 1
-% more than LSS and CSS).
-useAdjustedR2 = false;
+useAdjustedR2 = false; % Do we want to adjust for the nr of regressors in pRF models 
+                       % (CST having 1 more than LSS and CSS).
 nrTimePoints = 648;
 
 % Preallocate arrays
@@ -53,7 +78,9 @@ end
 
 Tanova_full = table(allSubjectsR2,allROINames,allModelNames, 'VariableNames',{'R2','ROI','pRFModel'});
 WithinDesignT = table([1 2 3],'VariableNames',{'Models'});
-rm_an2 = fitrm(Tanova_full,'R2~ROI*pRFModel','WithinDesign',WithinDesignT);
-rm_an2.anova
-rm_an2.multcompare('pRFModel','By','ROI','ComparisonType','Bonferroni')
+rm = fitrm(Tanova_full,'R2~ROI*pRFModel','WithinDesign',WithinDesignT);
+twoWayAnovaResults = rm.anova;
+ttestResults = rm.multcompare('pRFModel','By','ROI','ComparisonType','Bonferroni');
+
+grpstat_ROI = grpstats(rm,'ROI','pRFModel',{'mean','std','meanci','var'});
 

@@ -1,6 +1,45 @@
 function fH = makeSupplFigure7_DoGPredictions(projectDir,ds,lmmResults, ...
                 lmmResults_Model,modelName, roisToPlot,cmapModels, useSTRetParams, ...
                 temporalModel, spatialModel, subjnrs, saveFigs, saveFigDir)
+% Function to reproduce supplementary manuscript figure 7: 
+% panel a/b: V1 time series + LSS, CSS, CST, DOG model prediction for each stimulus condition 
+% panel b: violin plots showing cross-validated R^2 for LSS, CSS, CST models
+% panel c: Data and modelbased (predicted) suppression slopes for V1-hV4
+%
+% From the paper:
+% Title:   Rethinking simultaneous suppression in visual cortex via 
+%          compressive spatiotemporal population receptive fields.
+% Authors: Kupers, Kim, Grill-Spector (2024).
+% Journal: Nature Communications
+% DOI:     XXX
+%
+% Requires getting MRI data from OSF (see downloadDataTableFromOSF.m)
+%
+% Code written by E.R. Kupers (2024) Stanford University
+% 
+% INPUTS (required):
+% - projectDir
+% - ds              : dataset
+% - lmmResults      : cell (1x number of ROIs), containing a struct with fields:
+%                       fixedIntercepts, fixedSlopes, 
+%                       fixedIntercepts_CI, fixedSlopes_CI
+% - lmmResults_Model : MODELS cell (3x number of ROIs), containing a struct with fields:
+%                       fixedIntercepts, fixedSlopes, 
+%                       fixedIntercepts_CI, fixedSlopes_CI
+% - modelName       : Abbreviated names of pRF models
+% - roisToPlot      : cell with ROI names
+% - cmapModels      : color map for pRF models
+% - useSTRetParams  : (boolean) are we using supplementary spatiotemporal
+%                               retinotopy data or not?
+% - spatialModel    : spatial components of pRF models
+% - temporalModel   : temporal components of pRF models
+% - subjnrs         : Subjects to plot
+% - saveFigs        : save figures or not?
+% - saveFigDir      : folder to save figures
+%
+% OUTPUTS:
+% - fH         : figure handle            
+            
 % Check inputs
 if isempty(cmapModels) || ~exist('cmapModels','var')
     cmapModels = getColormapPRFModels(2);
@@ -58,15 +97,15 @@ for idx = 1:4
 end
 
 if saveFigs
-    fName = 'R2Group_DoG_ViolinPlotAllVoxels';
-    subDir = 'SupplFig2';
+    fName = 'SupplFig7_R2Group_DoG_ViolinPlotAllVoxels';
+    subDir = 'SupplFig7';
     if ~exist('saveFigDir','dir')
         saveFigDir = fullfile(simseqRootPath,'results','group');
     end
     thisSaveFigDir = fullfile(saveFigDir,subDir);
     if ~exist(thisSaveFigDir,'dir'); mkdir(thisSaveFigDir); end
     saveas(gcf, fullfile(thisSaveFigDir, [fName '.png']))
-     print(gcf,fullfile(thisSaveFigDir,fName),'-depsc2','-painters','-r300','-loose')
+%      print(gcf,fullfile(thisSaveFigDir,fName),'-depsc2','-painters','-r300','-loose')
 end
 
 

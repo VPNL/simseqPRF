@@ -18,14 +18,24 @@
 % Written by Eline R Kupers, Stanford U 2021
 
 %% Define paths and parameters
-projectDir = '/oak/stanford/groups/kalanit/biac2/kgs/projects/spatiotemporal/';
-pilotNr    = 3;
-exponents  = [NaN,NaN, 0.1:0.05:1]; %Use NaN for linear and CSS model, use [0.1:0.1:1] for ST grid fit
+projectDir = fullfile(simseqRootPath);
+useSTRetParams  = true; % If true, we use solved parameters from spatiotemporal retinotopy paper for 3ch-stLN model
+roiType0        = 'stimcorner4_area4sq_eccen5';
+if useSTRetParams
+    subjnrs = [1:3,7:10];
+    subDir = 'savedPredictions_fixedPRF_combT_matchingVoxels';
+    spatialModels  = {'onegaussianFit','onegaussianFit'};
+    temporalModels = {'3ch-stLN','1ch-dcts'};  % CSTopt & DNST
+else
+    subjnrs = [1:3,7:13];
+    subDir = 'savedPredictions_fixedPRF_combT';
+    spatialModels  = {'onegaussianFit','cssFit','onegaussianFit'};
+    temporalModels = {'1ch-glm','1ch-glm','3ch-stLN'};
+end
 
-for subjnr = [1,2,3,7,8,9,10,11,12,13]
+for subjnr = subjnrs
     
-    sesNr = getSessionNrMainExp(subjnr);
-    pths  = getSubjectPaths(projectDir,subjnr,sesNr);
+    pths  = getSubjectPaths(projectDir,subjnr);
     
     % Define inputs such as folders
     stimFileName   = 'stim_simseq_run';
@@ -35,35 +45,62 @@ for subjnr = [1,2,3,7,8,9,10,11,12,13]
     saveFigDir     = fullfile(pths.figureDir, 'cvfits');
     removedTRsAtStart = 2; % Preprocessing EPIs removed 8 TRs (= 6 TRs countdown + 2 TRs baseline),
     % Here, we remove two extra TRs, since the countdown is not part of model prediction
-    spatialModels   = {'onegaussianFit','cssFit','onegaussianFit'};
-    temporalModels  = {'1ch-glm','1ch-glm','3ch-stLN'};
     
-    for expn = exponents
-        if isnan(expn)
-            modelsToRun = [1,2];
-            useFixedExponent = NaN;
-        else
-            modelsToRun = 3;
-            useFixedExponent = expn;
+    for ii = 1:length(temporalModels)
+        
+        if strcmp(temporalModels{ii},'1ch-glm') && ~useSTRetParams
+            % Standard Gaussian model
+            useFixedExponent = [];
+            exponents        = NaN; % NaN means no fixed exponent in modelfit: Use NaN for linear and CSS model
+            combChan         = [];
+            loadDataFolder   = loadDataFolder0;
+            saveBetaFolder   = saveBetaFolder0;
+            
+        elseif strcmp(temporalModels{ii},'1ch-dcts') && useSTRetParams
+            % Standard Gaussian model + 1-chan Divisive Normalization spatiotemporal model
+            useFixedExponent = [];
+            combChan         = [];
+            exponents        = NaN; % NaN means no fixed exponent in modelfit: Use NaN for linear and CSS model
+            loadDataFolder   = [loadDataFolder0 '_stRet_matchingVoxels_' temporalModels{ii}];
+            roiType          = sprintf('%s_%s',roiType0,'stRet_CSTopt_DNST_matchingVoxels');
+            saveBetaFolder   = [saveBetaFolder0 '_matchingVoxels'];
+            
+        elseif strcmp(temporalModels{ii},'3ch-stLN') && ~useSTRetParams
+            % Standard Gaussian model + 3-chan linear-nonlinear spatiotemporal model
+            combChan       = [1 2 2];
+            exponents      = [0.1:0.05:1]; % Grid fit: systematically sweep 0-1
+            loadDataFolder = loadDataFolder0;
+            saveBetaFolder   = saveBetaFolder0;
+            
+        elseif strcmp(temporalModels{ii},'3ch-stLN') && useSTRetParams
+            % Standard Gaussian model + 3-chan linear-nonlinear
+            % spatiotemporal model with parameters from ST ret exp
+            combChan       = [1 2 2];
+            exponents      = NaN; % NaN means no fixed exponent in modelfit: We will use optimized params from spatiotemporal retinotopy experiment
+            useFixedExponent = [];
+            loadDataFolder   = [loadDataFolder0 '_stRet_matchingVoxels_' temporalModels{ii}];
+            roiType          = sprintf('%s_%s',roiType0,'stRet_CSTopt_DNST_matchingVoxels');
+            saveBetaFolder   = [saveBetaFolder0 '_matchingVoxels'];
         end
-        for ii = modelsToRun
-            simseq_fitTemporalModelPredictionsToPreprocData(...
-                subjnr, projectDir,spatialModels{ii},temporalModels{ii},...
-                'saveBetaFolder',saveBetaFolder,'subFolder',subFolder, ...
-                'sessionNr', sesNr,'saveFigDir',saveBetaFolder, ...
-                'loadDataFolder',loadDataFolder, ...
-                'roiType','stimcorner4_area4sq_eccen5', ...
-                'hemi', 'both', ...
-                'removedTRsAtStart',removedTRsAtStart, ...
-                'weightChannels', [], ...
-                'doCrossValidation', true, ...
-                'roiIdx','all', ...
-                'useFixedExponent',useFixedExponent,...
-                'useSearchFit',false, ...
-                'verbose', true);
-        end
+        
+        % Run modelfit
+        simseq_fitTemporalModelPredictionsToPreprocData(...
+            subjnr, projectDir,spatialModels{ii},temporalModels{ii},...
+            'saveBetaFolder',saveBetaFolder,...
+            'subFolder',subFolder, ...
+            'sessionNr', sesNr,...
+            'saveFigDir',saveBetaFolder, ...
+            'loadDataFolder',loadDataFolder, ...
+            'roiType',roiType, ...
+            'hemi', 'both', ...
+            'removedTRsAtStart',removedTRsAtStart, ...
+            'weightChannels', [], ...
+            'doCrossValidation', true, ...
+            'roiIdx','all', ...
+            'useFixedExponent',useFixedExponent,...
+            'useSearchFit',false, ...
+            'useSTRetParams', useSTRetParams, ...
+            'verbose',true);
     end
     
-end
-
 end

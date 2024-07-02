@@ -14,21 +14,11 @@ for idx = 1:length(roisToPlot)
     plot(currGroupMeanOfMedianExp+[-currGroupSEMOfMedianExp,currGroupSEMOfMedianExp],[grandMeanSlope,grandMeanSlope],'k-'); %'color',cmapROIs(idx,:));
     plot([currGroupMeanOfMedianExp,currGroupMeanOfMedianExp],grandMeanSlope+[-grandSEMSlope,grandSEMSlope],'k-');%'color',cmapROIs(idx,:));
 end
-sgtitle('Group Average (+/- SEM): median prf CST exponent vs suppression slope','FontSize',13);
 xlim([0 1]); ylim([0 1]); box off; axis square;
 set(gca,'XTick',[0.1:0.1:1],'YTick',[0.1:0.1:1])
 xlabel('Median pRF CST exponent (a.u.)');
 ylabel('Suppression level (fitted regression slope)')
 
-if saveFigs
-    saveFigDir = fullfile(simseqRootPath,'results','group');
-    subDir     = 'fig8';
-    fName = sprintf('SummaryGroupAverageSEM_LMMfitSlopeVsPRFExp');
-    thisSaveFigDir = fullfile(saveFigDir, subDir);
-    if ~exist(thisSaveFigDir,'dir'); mkdir(thisSaveFigDir); end
-    saveas(gcf, fullfile(thisSaveFigDir, [fName '.png']))
-%     print(gcf,fullfile(thisSaveFigDir,fName),'-depsc')
-end
 
 %% Compute Pearson's correlation (rho)
 mnCondSlopes = NaN(length(roisToPlot),size(lmmResults.subjSlopes{1},1));
@@ -41,4 +31,16 @@ end
 fprintf('Pearson''s correlation group average LMM slopes and pRF CST exponent:\n')
 fprintf('rho: %1.2f\tp-val: %1.4f\t95%% CI: [%1.2f, %1.2f]\n',...
     rho(1,2), rhoPval(1,2),rhoLower(1,2),rhoUpper(1,2))
+title({'Group Average (+/- SEM): median prf CST exponent vs suppression slope',...
+        sprintf('rho: %1.2f\tp-val: %1.4f\t95%% CI: [%1.2f, %1.2f]\n',...
+        rho(1,2), rhoPval(1,2),rhoLower(1,2),rhoUpper(1,2))},'FontSize',13);
 
+if saveFigs
+    saveFigDir = fullfile(simseqRootPath,'results','group');
+    subDir     = 'fig8';
+    fName = sprintf('SummaryGroupAverageSEM_LMMfitSlopeVsPRFExp');
+    thisSaveFigDir = fullfile(saveFigDir, subDir);
+    if ~exist(thisSaveFigDir,'dir'); mkdir(thisSaveFigDir); end
+    saveas(gcf, fullfile(thisSaveFigDir, [fName '.png']))
+%     print(gcf,fullfile(thisSaveFigDir,fName),'-depsc')
+end

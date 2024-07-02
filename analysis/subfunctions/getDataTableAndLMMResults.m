@@ -1,5 +1,5 @@
 function [ds, fLMM, fLMM_Model, lmmResults, lmmResults_Model] = ...
-    getDataTableAndLMMResults(projectDir, lmmModelFlag, saveFolderNameDS)
+    getDataTableAndLMMResults(projectDir, lmmModelFlag, saveFolderNameDS,subjnrs)
 % Function to create and run main linear mixed model (LMM) on data and
 % model mean stimulus block amplitudes. For comparing LMMs to more
 % conservative models, see s_compareLMM.m. Note: Running model LMMs take
@@ -23,24 +23,29 @@ function [ds, fLMM, fLMM_Model, lmmResults, lmmResults_Model] = ...
 %                             each slope/intercept field has 4 conditions
 % LMM_params       : (struct) Structure with fitted model string, nr of
 %                             fixed and random variables and model names
-
+%
+% Code written by E.R. Kupers (2024) Stanford University
+%
 %% Check inputs
 if ~exist('lmmModelFlag','var') || isempty(lmmModelFlag)
-    lmmModelFlag = false;
+    lmmModelFlag = true;
 end
 
-if ~exist('saveFolderNameDS','var') || isempty(saveFolderNameDS)
-    saveLMMResults = false;
+if ~exist('saveLMMResults','var') || isempty(saveLMMResults)
+    saveLMMResults = true;
 end
 
 % Create data table
-postFix = '_variableBlockOnset_gridFit2';
-ds = createDataTable(projectDir,postFix);
+postFix = 'BlockAmps_pRFparams_modelFit_results_cv_variableBlockOnset';
+ds = createDataTable(projectDir,subjnrs,postFix);
 
 % Reorder ROIs
-roisToPlot = unique(ds.ROI,'stable');
-newROIOrder = [1,2,3,4,5,8,9,6,7];
-roisToPlot = roisToPlot(newROIOrder);
+allRoisToPlot = unique(ds.ROI,'stable');
+roiNames = ["V1","V2","V3","hV4","VO1/VO2","V3AB","IPS0/IPS1","LO1/LO2","TO1/TO2"];
+for ii = 1:length(roiNames)
+    newROIOrder(ii) = find(ismember(string(allRoisToPlot),roiNames{ii}));
+end
+roisToPlot = allRoisToPlot(newROIOrder);
 
 %% Fit LMM to data
 % Random intercepts and slopes per subject and condition

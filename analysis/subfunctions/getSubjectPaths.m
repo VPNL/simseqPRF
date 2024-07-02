@@ -1,25 +1,22 @@
 function pths = getSubjectPaths(projectDir, subjID)
+% Function to get subject path to reproduce data/figures of paper:
+%
+% Title:   Rethinking simultaneous suppression in visual cortex via 
+%          compressive spatiotemporal population receptive fields.
+% Authors: Kupers, Kim, Grill-Spector (2024).
+% Journal: Nature Communications
+% DOI:     XXX
+%
+% Requires getting MRI data from OSF (see downloadDataTableFromOSF.m)
+%
+% Code written by E.R. Kupers (2024) Stanford University
 
-% %
-% % allSessions = {};
-% % allSessions{1}  = {'ses-01'};          % subj01, pilot 1, pilot 2.1, main exp
-% % allSessions{2}  = {'session1','session2-donotuse','session3'}; % subj02, pilot 1, main exp-donotuse, pilot 3
-% % allSessions{3}  = {'session1','session2'};             % subj03, pilot 1, main exp
-% % allSessions{4}  = {'session1', 'session2'};            % subj04, pilot 2.1, pilot 2.2
-% % allSessions{6}  = {'session1-donotuse'};               % subj06, main exp-donotuse
-% % allSessions{7}  = {'session1'};                        % subj07, main exp
-% % allSessions{8}  = {'session1'};                        % subj08, main exp
-% % allSessions{9}  = {'session1','session2','session3'};  % subj09, pilot 2.1, pilot 2.2, main exp
-% % allSessions{10} = {'session1'};                        % subj10, main exp
-% % allSessions{11} = {'session1'};                        % subj11, main exp
-% % allSessions{12} = {'session1'};                        % subj12, main exp
-% % allSessions{13} = {'session1'};                        % subj13, main exp
-
+%%
 pths = struct();
 pths.projectDir       = projectDir;
 pths.subjnr           = subjID;
 pths.subjID           = sprintf('subj%02d', subjID);
-% pths.anatName         = allAnatNames{subjID};
+% pths.anatName       = allAnatNames{subjID}; % no anatomy in this folder
 pths.dataDirSimSeq    = fullfile(projectDir, 'data', 'simseq');
 pths.dataDirToon      = fullfile(projectDir, 'data', 'toon');
 pths.stimDir          = fullfile(projectDir, 'data', 'stimuli');
@@ -77,11 +74,11 @@ switch subjID
 end
 
 % %% Stimuli
-% d = dir(fullfile(pths.dataDirSimSeq,pths.subjID, 'Stimuli','simseqPRF*.mat'));
-% 
-% for ii = 1:length(d)
-%     pths.stimFiles{ii} = fullfile(d(ii).folder,d(ii).name);
-% end
+d = dir(fullfile(pths.dataDirSimSeq,'behavior',pths.subjID,'simseqPRF*.mat'));
+
+for ii = 1:length(d)
+    pths.stimFiles{ii} = fullfile(d(ii).folder,d(ii).name);
+end
 
 %% ROIs
 % We exclude ROIs for some subjects because they are not retinotopically

@@ -1,27 +1,35 @@
-function ds = createDataTable(projectDir)
-
+function ds = createDataTable(projectDir,subjnrs,postFix)
+%% Function to create voxel data table:
+% NOTE: Requires running s_prepareDataForPlotting.m
+% 
+% INPUTS:
+% projectDir : base folder where cloned code repo and downloaded data live
+% subjnrs    : subject numbers (as in the fMRI experiment)
+% postFix    : fixed section of file name
+%
+% OUTPUTS:
+% ds        : dataset (required for fitting LMM)
+%
+% Code written by E.R. Kupers (2024) Stanford University
+%
 %% Load data
-subjnrs      = [1,2,3,7,8,9,10,11,12,13]; 
-roiOrder     = [1:6,8:11,7,12,13]; 
-roiNames     = {'V1','V2','V3','hV4','VO1','VO2','V3AB','LO1','LO2','TO1','TO2','IPS0','IPS1'};
-combROIs     = [5,8,10,12]; %VO1/2 (5,6), LO1/2(8,9), TO1/2 (10,11), IPS0/1 (12,13)
-conditionNamesSimSeq        = {'Small-0.2s','Small-1s','Large-0.2s','Large-1s'};
-nrConditions                = length(conditionNamesSimSeq);
-conditionOrderSimSeq        = [1,2,3,4];
-modelNames = {'Linear','CSS','ST'};
+roiOrder                = [1:6,8:11,7,12,13]; 
+roiNames                = {'V1','V2','V3','hV4','VO1','VO2','V3AB','LO1','LO2','TO1','TO2','IPS0','IPS1'};
+combROIs                = [5,8,10,12]; %VO1/2 (5,6), LO1/2(8,9), TO1/2 (10,11), IPS0/1 (12,13)
+conditionNamesSimSeq    = {'Small-0.2s','Small-1s','Large-0.2s','Large-1s'};
+nrConditions            = length(conditionNamesSimSeq);
+conditionOrderSimSeq    = [1,2,3,4];
+modelNames              = {'LSS','CSS','ST'};
 
 % Define path to data
 sNames         = sprintf('S%i_',subjnrs);
-load(fullfile(projectDir,'experiments/simseq/results/average/gridFit2_Results',...
-    sprintf('%sBlockAmps_pRFparams_modelFit_results_cv%s.mat',sNames,postFix))); %, ...
-%     'paramsROI','noiseceilingRun','amplTrial', 'r2Runs','betaRuns','modelTrial');
+load(fullfile(projectDir,'data','simseq/group',...
+    sprintf('%s%s.mat',sNames,postFix))); 
 
 % Get paths to make figure dir
-pths = getSubjectPaths(projectDir,1,3);
+pths = getSubjectPaths(projectDir,1);
 
 % Get top 250 voxels based on split half reliability (i.e. noise ceiling)
-% [selectedVoxels_nc, rNC] = selectVoxelsFromNoiseCeiling(noiseceilingRun, amplTrial, roiOrder, combROIs, nc_thresh);
-% [selectedVoxels_ve, ve] = selectVoxelsFromPRFVarExpl(paramsROI, roiOrder, combROIs, ve_thresh);
 nc_thresh      = 0.1; % threshold in percentage noise ceiling from simseq exp
 ve_thresh      = 0.2; % threshold in percentage of pRF var expl. from toonotopy
 [selectedVoxels, rNC, ve] = selectVoxels(noiseceilingRun, paramsROI, nc_thresh, ve_thresh, roiOrder, combROIs);
@@ -56,6 +64,7 @@ for sj = 1:length(subjnrs)
             BetaCSTSustToAdd = ncToAdd;
             BetaCSTTransToAdd = ncToAdd;
      
+            % Combine ROI pRF data, betas and R^2 data 
             if ismember(roiOrder(idx),combROIs) && ~isempty(paramsROI{sj,roiOrder(idx+1)})         
                 expCSTPRF = [paramsROI{sj,roiOrder(idx),3}.exp_temporal.both,paramsROI{sj,roiOrder(idx+1),3}.exp_temporal.both];
                 expCSSPRF = [paramsROI{sj,roiOrder(idx),2}.exp_spatial.both,paramsROI{sj,roiOrder(idx+1),2}.exp_spatial.both];
@@ -93,6 +102,7 @@ for sj = 1:length(subjnrs)
             end
             nc = rNC{sj,roiOrder(idx)};
 
+            % Put pRF params into table
             if ~isempty(selectedVoxels{sj,roiOrder(idx)})
                 T_params = array2table([...
                     double(szPRF(sv_idx))', double(expCSTPRF(sv_idx))', ...
@@ -141,6 +151,7 @@ for sj = 1:length(subjnrs)
                         
                     end
                     
+                    % Create observed and modeled amplitudes
                     T_seq = array2table(double(seqData(sv_idx))','VariableNames',{'MeanSeqAmp'});
                     T_sim = array2table(double(simData(sv_idx))','VariableNames',{'MeanSimAmp'});
                     T_seqModel = array2table(double(seqModel(:,sv_idx))','VariableNames',{'MeanSeqAmpModelLSS','MeanSeqAmpModelCSS','MeanSeqAmpModelCST'});
@@ -148,29 +159,12 @@ for sj = 1:length(subjnrs)
                     
                     sz = size(T_seq,1);
                     
-%                     switch c
-%                         case 1  % 200 ms SMALL
-%                             durVec = zeros(sz,1);
-%                             sizeVec = zeros(sz,1);
-%                         case 2 % 1000 ms SMALL
-%                             durVec = ones(sz,1);
-%                             sizeVec = zeros(sz,1);
-%                         case 3 % 200 ms BIG
-%                             durVec = zeros(sz,1);
-%                             sizeVec = ones(sz,1);
-%                         case 4 % 1000 ms BIG
-%                             durVec = ones(sz,1);
-%                             sizeVec = ones(sz,1);
-%                     end
-                    
+                    % Create labels
                     labels_Tall = table( ...
                         ones(sz,1).*sj,...
                         repmat(roiName,sz,1), ...
                         ones(sz,1).*c, ...
                         'VariableNames',{'Subject','ROI','Condition'});
-
-%                         durVec, ...
-%                         sizeVec, ...
                     
                     T_tmp = [labels_Tall, T_seq, T_sim, T_params, T_seqModel, T_simModel]; % T_params has (nc,R2 LSS/CSS/CST, pRF sz/exp/ve)
                     T = [T; T_tmp];
@@ -181,11 +175,7 @@ for sj = 1:length(subjnrs)
 end
 
 %% Convert to a dataset
-
 ds = table2dataset(T);
 ds.Subject        = ds.Subject;
 ds.Condition      = nominal(ds.Condition);
 ds.ROI            = nominal(ds.ROI);
-% ds.DurShort0Long1 = nominal(ds.DurShort0Long1);
-% ds.SizeSml0Big1   = nominal(ds.SizeSml0Big1);
-

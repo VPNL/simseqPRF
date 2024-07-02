@@ -1,5 +1,28 @@
-function fH = makeSupplFigure4_eyefixation(projectDir,subjnrs,saveFigs)
-
+function fH = makeSupplFigure5_eyefixation(projectDir,subjnrs,saveFigs,saveFigDir)
+% Function to reproduce supplementary figure 5: 
+% Plotting the distribution of eye gaze position
+%
+% From the paper:
+% Title:   Rethinking simultaneous suppression in visual cortex via 
+%          compressive spatiotemporal population receptive fields.
+% Authors: Kupers, Kim, Grill-Spector (2024).
+% Journal: Nature Communications
+% DOI:     XXX
+%
+% Requires getting MRI data from OSF (see downloadDataTableFromOSF.m)
+%
+% Code written by E.R. Kupers (2024) Stanford University
+% 
+% INPUTS (required):
+% - projectDir      : base folder of project
+% - subjnrs         : Subjects to plot
+% - saveFigs        : save figures or not?
+% - saveFigDir      : folder to save figures
+%
+% OUTPUTS:
+% - fH         : figure handle
+%
+%% Check inputs
 if ~exist('subjnrs','var') || isempty(subjnrs)
     subjnrs = [1,2,3,7,12];
 end
@@ -131,8 +154,8 @@ title('N=5')
 plot(mean(mnMdRun(:,1),1,'omitnan'),mean(mnMdRun(:,2),1,'omitnan'),'+r','markersize',5); hold on;
 
 if saveFigs
-    fName = sprintf('AllSubjects_eyetracking_XYDensity_wContours');
-    saveas(gcf,fullfile(saveFigDir,[fName '.png']))
+    fName = sprintf('supplFig5_eyetracking_XYDensity_wContours');
+    saveas(gcf,fullfile(saveFigDir,'supplFig5',[fName '.png']))
     %     print(gcf,fullfile(saveFigDir,fName),'-depsc','-painters','-r300','-loose');
 end
 

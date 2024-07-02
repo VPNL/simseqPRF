@@ -2,7 +2,7 @@ function fH = plotDataModelFitDoG_singleVoxel_StimulusConditionBlocks(projectDir
 
 % Parse inputs
 p = inputParser;
-p.addRequired('projectDir', @ischar); % '/oak/stanford/groups/kalanit/biac2/kgs/projects/spatiotemporal';
+p.addRequired('projectDir', @ischar); %
 p.addRequired('subjnrs', @isnumeric); % Subject nrs are: [1,2,3,7,8,9,10,11,12,13]
 p.addParameter('plotModelFlag',true, @islogical);
 p.addParameter('roisToPlot',[],@(x) (iscell(x) || isnumeric(x)));

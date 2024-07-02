@@ -5,8 +5,6 @@ switch selectionType
          [~,timepoints] = intersect(timeWindow,[4:12]);
         timepoints = timepoints';
     case 'variableOnset'
-%         bsl = mean(data(timeWindow<=0));
-%         data = data-bsl;
         [~,zeroIdx] = find(timeWindow==0);
         threshOnset = 0.1;
         blockLength = 9;

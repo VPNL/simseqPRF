@@ -60,13 +60,15 @@ function [] = simseq_fitTemporalModelPredictionsToPreprocData(subjnr,projectDir,
 % [useFixedExponent]      : (float) single numeric value with the
 %                               fixed exponent you want to fit separately.
 %                               we use this function to do a grid search.
+% [useSTRetParams]        : (bool) use spatiotemporal retinotopy experiment
+%                               parameters
 
 %% 1. Set params and folders
 p = inputParser;
 p.addRequired('subjnr', @isnumeric);
 p.addRequired('projectDir',@ischar);
 p.addRequired('spatialModel', @(x) any(validatestring(x,{'cssFit','onegaussianFit','differenceOfGaussiansFit'})));
-p.addRequired('temporalModel', @(x) any(validatestring(x,{'1ch-glm','1ch-dcts','2ch-exp-sig','2ch-css-sig','3ch-stLN'})));
+p.addRequired('temporalModel', @(x) any(validatestring(x,{'1ch-glm','1ch-dcts','3ch-stLN'})));
 p.addParameter('hemi','both', @(x) any(validatestring(x,{'lh','rh','both'})));
 p.addParameter('removedTRsAtStart', 2, @isnumeric);
 p.addParameter('roiType','stimcorner4_area4sq_eccen5',@ischar);
@@ -89,6 +91,7 @@ p.addParameter('doCrossValidation',false,@islogical);
 p.addParameter('useFixedExponent', [], @isnumeric);
 p.addParameter('totalBlockTRs',{-4:1:18},@iscell);
 p.addParameter('baselineBlockTRs',{-4:1:0},@iscell);
+p.addParameter('useSTRetParams',false, @islogical);
 p.parse(subjnr,projectDir,spatialModel,temporalModel,varargin{:});
 
 % Rename variables
@@ -156,11 +159,18 @@ for roi = 1:length(rois) % find(ismember(rois,'VO1')) % %
     
     % Load preprocessed data (see s_runDataPreproc.m)
     postFix = sprintf('%d',1:max(stimRun));
-    
-    loadFile = fullfile(loadDataFolder,...
-        sprintf('%s%d_v%d',subFolderName,max(stimRun),pths.expversionNr),...
-        sprintf('preprocData_%s_%s_%s_run%s.mat', ...
-        rois{roi},roiType,'cssFit', postFix));
+    if useSTRetParams
+        loadFile = fullfile(loadDataFolder,...
+            sprintf('%s%d_v%d',subFolderName,max(stimRun),pths.expversionNr),...
+            sprintf('preprocData_%s_%s_%s_run%s.mat', ...
+            rois{roi},roiType,'onegaussianFit', postFix));
+    else
+        loadFile = fullfile(loadDataFolder,...
+            sprintf('%s%d_v%d',subFolderName,max(stimRun),pths.expversionNr),...
+            sprintf('preprocData_%s_%s_%s_run%s.mat', ...
+            rois{roi},roiType,'cssFit', postFix));
+    end
+    if exist(loadFile,'file')
     load(loadFile, 'T','allDataTrials','data','trials',...
         'nrTrials','er_data','stimMS','alignMe');
     
@@ -193,6 +203,11 @@ for roi = 1:length(rois) % find(ismember(rois,'VO1')) % %
              modelPredSubFolder = sprintf('modelPredictions_%s_searchfit_restricted',searchAlgorithm);
              predFile = fullfile(saveBetaFolder,subFolderName2, modelPredSubFolder,...
                 sprintf('modelPredictions_%s_%s_%s_%s_run%d_bestsFitExp.mat', ...
+                rois{roi},roiType,spatialModel, temporalModel, run));
+        elseif useSTRetParams
+            modelPredSubFolder = sprintf('modelPredictions_stRet_%s',temporalModel);
+            predFile = fullfile(saveBetaFolder,subFolderName2, modelPredSubFolder,...
+                sprintf('modelPredictions_%s_%s_%s_%s_run%d_expNaN.mat', ...
                 rois{roi},roiType,spatialModel, temporalModel, run));
         elseif isnan(useFixedExponent)
             predFile = fullfile(saveBetaFolder,subFolderName2, ...
@@ -263,18 +278,33 @@ for roi = 1:length(rois) % find(ismember(rois,'VO1')) % %
     if ~useSearchFit
         coords.dataRuns = alignMe.coords.dataRuns;
         alignMe = simseq_checkVoxelCorrespondance(coords, selectedpRFs);
-        numOrigVoxLH  = size(alignMe.coords.dataRuns.lh,2);
-        numOrigpRFsLH = size(alignMe.coords.pRFs.lh,2);
+        if isempty(alignMe.coords.dataRuns.lh)
+            numOrigVoxLH = 0;
+        else
+            numOrigVoxLH  = size(alignMe.coords.dataRuns.lh,2);
+        end
+        
+        if ~isfield(alignMe.coords.pRFs,'lh') || isempty(alignMe.coords.pRFs.lh)
+            numOrigpRFsLH = 0;
+        else
+            numOrigpRFsLH = size(alignMe.coords.pRFs.lh,2);
+        end
 
         % remove voxels from dataRuns and data gray coordinates
         if isfield(alignMe.pRFs,'selected')
             if isfield(alignMe.pRFs.selected,'lh') && ~isempty(alignMe.pRFs.selected.lh)
                 data.predRuns.lh = predRunBothHemi(:,alignMe.pRFs.selected.lh,:,:);
                 data.rf.lh       = predAllRuns{1}.pred.rf(:,:,alignMe.pRFs.selected.lh);
+            else
+                data.predRuns.lh = [];
+                data.rf.lh = [];
             end
             if isfield(alignMe.pRFs.selected,'rh') && ~isempty(alignMe.pRFs.selected.rh)
                 data.predRuns.rh = predRunBothHemi(:,numOrigpRFsLH+alignMe.pRFs.selected.rh,:,:);
                 data.rf.rh       = predAllRuns{1}.pred.rf(:,:,numOrigpRFsLH+alignMe.pRFs.selected.rh);
+            else
+                data.predRuns.rh = [];
+                data.rf.rh = [];
             end
         end
     
@@ -305,7 +335,15 @@ for roi = 1:length(rois) % find(ismember(rois,'VO1')) % %
         else
             numVoxRH = 0;
         end
-        bothVoxIdx = [alignMe.dataRuns.selected.lh; numOrigVoxLH+alignMe.dataRuns.selected.rh];
+        if (numVoxLH==0) && (numOrigVoxLH==0)
+            bothVoxIdx = alignMe.dataRuns.selected.rh;
+        elseif (numVoxRH==0) && (numOrigVoxLH>0)
+            bothVoxIdx = alignMe.dataRuns.selected.lh;
+        elseif numVoxLH < numOrigVoxLH
+            bothVoxIdx = [alignMe.dataRuns.selected.lh; numVoxLH+alignMe.dataRuns.selected.rh];
+        else
+            bothVoxIdx = [alignMe.dataRuns.selected.lh; numOrigVoxLH+alignMe.dataRuns.selected.rh];
+        end
         isequal(sum([numVoxLH,numVoxRH]), length(bothVoxIdx));
         
         if isfield(data.dataRuns, 'both') && strcmp(hemi,'both')
@@ -342,12 +380,35 @@ for roi = 1:length(rois) % find(ismember(rois,'VO1')) % %
             params.analysis.spatial.rh.effectiveSize(alignMe.pRFs.selected.rh));
         data.params.exponent.both      = cat(2,params.analysis.spatial.lh.exponent(alignMe.pRFs.selected.lh), ...
             params.analysis.spatial.rh.exponent(alignMe.pRFs.selected.rh));
+        data.params.varexpl.both       = cat(2,params.analysis.spatial.lh.varexpl(alignMe.pRFs.selected.lh), ...
+            params.analysis.spatial.rh.varexpl(alignMe.pRFs.selected.rh));
         if ~isempty(useFixedExponent) && ~isnan(useFixedExponent)
             data.params.exponent_temporal.both  = cat(2,predAllRuns{1}.pred.params.analysis.temporal.param.exponent(alignMe.pRFs.selected.lh), ...
                 predAllRuns{1}.pred.params.analysis.temporal.param.exponent(numOrigpRFsLH+alignMe.pRFs.selected.rh));
         end
-        data.params.varexpl.both       = cat(2,params.analysis.spatial.lh.varexpl(alignMe.pRFs.selected.lh), ...
-            params.analysis.spatial.rh.varexpl(alignMe.pRFs.selected.rh));
+        if useSTRetParams
+            data.params.temporal.both = cat(2, params.analysis.spatial.lh.temporal.param.all(alignMe.pRFs.selected.lh), ...
+                params.analysis.spatial.rh.temporal.param.all(alignMe.pRFs.selected.rh));
+            if strcmp(temporalModel,'1ch-dcts')
+                data.params.temporal.param.tau1      = cat(2,params.analysis.spatial.lh.temporal.param.tau1(alignMe.pRFs.selected.lh), ...
+                    params.analysis.spatial.rh.temporal.param.tau1(alignMe.pRFs.selected.rh));
+                data.params.temporal.param.weight    = cat(2,params.analysis.spatial.lh.temporal.param.weight(alignMe.pRFs.selected.lh), ...
+                    params.analysis.spatial.rh.temporal.param.weight(alignMe.pRFs.selected.rh));
+                data.params.temporal.param.tau2      = cat(2,params.analysis.spatial.lh.temporal.param.tau2(alignMe.pRFs.selected.lh), ...
+                    params.analysis.spatial.rh.temporal.param.tau2(alignMe.pRFs.selected.rh));
+                data.params.temporal.param.n         = cat(2,params.analysis.spatial.lh.temporal.param.n(alignMe.pRFs.selected.lh), ...
+                    params.analysis.spatial.rh.temporal.param.n(alignMe.pRFs.selected.rh));
+                data.params.temporal.param.sigma     = cat(2,params.analysis.spatial.lh.temporal.param.sigma(alignMe.pRFs.selected.lh), ...
+                    params.analysis.spatial.rh.temporal.param.sigma(alignMe.pRFs.selected.rh));
+            elseif useSTRetParams && strcmp(temporalModel,'3ch-stLN')
+                data.params.temporal.param.tau_s      = cat(2,params.analysis.spatial.lh.temporal.param.tau_s(alignMe.pRFs.selected.lh), ...
+                    params.analysis.spatial.rh.temporal.param.tau_s(alignMe.pRFs.selected.rh));
+                data.params.temporal.param.tau_t      = cat(2,params.analysis.spatial.lh.temporal.param.tau_t(alignMe.pRFs.selected.lh), ...
+                    params.analysis.spatial.rh.temporal.param.tau_t(alignMe.pRFs.selected.rh));
+                data.params.temporal.param.exponent   = cat(2,params.analysis.spatial.lh.temporal.param.exponent(alignMe.pRFs.selected.lh), ...
+                    params.analysis.spatial.rh.temporal.param.exponent(alignMe.pRFs.selected.rh));
+            end
+        end
     elseif isfield(data.predRuns,'lh')
         data.predRuns.both             = data.predRuns.lh;
         data.rf.both                   = data.rf.lh;
@@ -355,10 +416,10 @@ for roi = 1:length(rois) % find(ismember(rois,'VO1')) % %
         data.params.y0.both            = params.analysis.spatial.lh.y0(alignMe.pRFs.selected.lh);
         data.params.effectiveSize.both = params.analysis.spatial.lh.effectiveSize(alignMe.pRFs.selected.lh);
         data.params.exponent.both      = params.analysis.spatial.lh.exponent(alignMe.pRFs.selected.lh);
-         if ~isempty(useFixedExponent) && ~isnan(useFixedExponent)
+        data.params.varexpl.both       = params.analysis.spatial.lh.varexpl(alignMe.pRFs.selected.lh);
+        if ~isempty(useFixedExponent) && ~isnan(useFixedExponent)
             data.params.exponent_temporal.both  = predAllRuns{1}.pred.params.analysis.temporal.param.exponent(alignMe.pRFs.selected.lh);
         end
-        data.params.varexpl.both       = params.analysis.spatial.lh.varexpl(alignMe.pRFs.selected.lh);
     elseif isfield(data.predRuns,'rh')
         data.predRuns.both             = data.predRuns.rh;
         data.rf.both                   = data.rf.rh;
@@ -366,10 +427,14 @@ for roi = 1:length(rois) % find(ismember(rois,'VO1')) % %
         data.params.y0.both            = params.analysis.spatial.rh.y0(alignMe.pRFs.selected.rh);
         data.params.effectiveSize.both = params.analysis.spatial.rh.effectiveSize(alignMe.pRFs.selected.rh);
         data.params.exponent.both      = params.analysis.spatial.rh.exponent(alignMe.pRFs.selected.rh);
+        data.params.varexpl.both       = params.analysis.spatial.rh.varexpl(alignMe.pRFs.selected.rh);
         if ~isempty(useFixedExponent) && ~isnan(useFixedExponent)
             data.params.exponent_temporal.both  = predAllRuns{1}.pred.params.analysis.temporal.param.exponent(numOrigpRFsLH+alignMe.pRFs.selected.rh);
         end
-        data.params.varexpl.both       = params.analysis.spatial.rh.varexpl(alignMe.pRFs.selected.rh);
+    end
+    
+    if useSTRetParams && strcmp(temporalModel,'3ch-stLN')
+        data.params.exponent_temporal.both = data.params.temporal.param.exponent;
     end
     
     else

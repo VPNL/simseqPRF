@@ -1,17 +1,32 @@
-function fH = makeSupplFigure5_compareLMMs(projectDir,saveFigs)
-% Function to compare goodness of fit for different linear mixed models
+function fH = makeSupplFigure6_compareLMMs(ds,roisToPlot,saveFigs,saveFigDir)
+% Function to reproduce supplementary figure 5: 
+% Compare goodness of fit for different linear mixed models
+%
 % Main LMM: fixed ampl & condition effects + random subject intercept and slope for each condition.
 % LMM alternative 0: fixed ampl + 1 random subject intercept (same for each condition).
 % LMM alternative 1: fixed ampl & condition effects + 1 random subject intercept (same for each condition).
 % LMM alternative 2: fixed ampl & condition effects + 4 random subject intercept (for each condition).
-
-%% Get dataset
-ds = createDataTable(projectDir);
-
-% Reorder ROIs
-roisToPlot  = unique(ds.ROI,'stable');
-newRoiOrder = [1,2,3,4,5,6,7,8,9];
-roisToPlot  = roisToPlot(newRoiOrder);
+%
+% From the paper:
+% Title:   Rethinking simultaneous suppression in visual cortex via 
+%          compressive spatiotemporal population receptive fields.
+% Authors: Kupers, Kim, Grill-Spector (2024).
+% Journal: Nature Communications
+% DOI:     XXX
+%
+% Requires getting MRI data from OSF (see downloadDataTableFromOSF.m)
+%
+% Code written by E.R. Kupers (2024) Stanford University
+% 
+% INPUTS (required):
+% - projectDir      : base folder of project
+% - subjnrs         : Subjects to plot
+% - saveFigs        : save figures or not?
+% - saveFigDir      : folder to save figures
+%
+% OUTPUTS:
+% - fH         : figure handle
+%
 
 %% MAIN LMM
 fLMM = cell(1,length(roisToPlot));
@@ -312,6 +327,29 @@ for ii = 1:length(roisToPlot)
     compareLMMs_LMM1_vs_LMM2{ii} = compareLMMmodels(fLMM_alt1{ii}, fLMM_alt2{ii});
 end
 
+for ii = 1:length(roisToPlot) 
+    fprintf('\nLLRT delta: LMM0 vs Main %s: chi(%d, N=%d)= %d, p=%1.5f \n', ...
+        string(roisToPlot(ii)), ...
+        compareLMMs_LMM0_v_Main{ii}.deltaDF(2), ...
+        fLMM{ii}.NumObservations, ...
+        compareLMMs_LMM0_v_Main{ii}.LRStat(2), ...
+        compareLMMs_LMM0_v_Main{ii}.pValue(2))
+    
+    fprintf('\nLLRT delta: LMM1 vs Main %s: chi(%d, N=%d)= %d, p=%1.5f \n', ...
+        string(roisToPlot(ii)), ...
+        compareLMMs_LMM1_v_Main{ii}.deltaDF(2), ...
+        fLMM{ii}.NumObservations, ...
+        compareLMMs_LMM1_v_Main{ii}.LRStat(2), ...
+        compareLMMs_LMM1_v_Main{ii}.pValue(2))
+    
+    fprintf('\nLLRT delta: LMM2 vs Main %s: chi(%d, N=%d)= %d, p=%1.5f \n', ...
+        string(roisToPlot(ii)), ...
+        compareLMMs_LMM2_v_Main{ii}.deltaDF(2), ...
+        fLMM{ii}.NumObservations, ...
+        compareLMMs_LMM2_v_Main{ii}.LRStat(2), ...
+        compareLMMs_LMM2_v_Main{ii}.pValue(2))
+end
+
 %% Compute difference in model goodness of fit (AIC, BIC, log-likelihood)
 for ii = 1:length(roisToPlot)
     AIC_0_v_Main(ii,:) = compareLMMs_LMM0_v_Main{ii}.AIC;
@@ -329,11 +367,11 @@ for ii = 1:length(roisToPlot)
     pVals_0_v_Main(ii,:) = compareLMMs_LMM0_v_Main{ii}.pValue(1);
     pVals_1_v_Main(ii,:) = compareLMMs_LMM1_v_Main{ii}.pValue(1);
     pVals_2_v_Main(ii,:) = compareLMMs_LMM2_v_Main{ii}.pValue(1);
- for ii = 1:length(roisToPlot)   
+
     DF_0_v_Main(ii,:) = compareLMMs_LMM0_v_Main{ii}.deltaDF;
     DF_1_v_Main(ii,:) = compareLMMs_LMM1_v_Main{ii}.deltaDF;
     DF_2_v_Main(ii,:) = compareLMMs_LMM2_v_Main{ii}.deltaDF;
- end
+end
 
 %% Compute differences in goodness-of-fit metrics
 AIC_main_v_m012 = [AIC_0_v_Main(:,1)-AIC_0_v_Main(:,2), AIC_1_v_Main(:,1)-AIC_1_v_Main(:,2), AIC_2_v_Main(:,1)-AIC_2_v_Main(:,2)];
@@ -386,9 +424,8 @@ legend boxoff
 
 % Save figure
 if saveFigs
-    fName = 'LMM_LL_AIC_BIC_Modelcomparision_v2';
-    saveFigDir = fullfile(simseqRootPath, 'results', 'group');
-    subDir = 'suplFig5';
+    fName = 'supplFig6_LMM_LL_AIC_BIC_Modelcomparision';
+    subDir = 'supplFig6';
     saveFigDirGroup = fullfile(saveFigDir, subDir);
     if ~exist(fullfile(saveFigDirGroup),'dir'),
         mkdir(fullfile(saveFigDirGroup));

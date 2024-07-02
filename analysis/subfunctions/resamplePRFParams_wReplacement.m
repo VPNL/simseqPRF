@@ -1,7 +1,31 @@
 function output = resamplePRFParams_wReplacement(ds, roisToPlot, useSTRetParams, temporalModel, spatialModel, subjnrs)
-%% Accumulate and resample effective pRF size, CSS exponent, CST exponent, cv-R2
-
-% Define params
+% Function to resample pRF parameters
+% For example, effective size, CSS exponent, CST exponent, cv-R2, etc.
+% 
+% Title:   Rethinking simultaneous suppression in visual cortex via 
+%          compressive spatiotemporal population receptive fields.
+% Authors: Kupers, Kim, Grill-Spector (2024).
+% Journal: Nature Communications
+% DOI:     XXX
+%
+% Main OSF storage URL: https://osf.io/rpuhs/
+% Supplemental OSF storage URL: https://osf.io/e83az/
+%
+% Code written by E.R. Kupers (2024) Stanford University
+%
+% INPUTS (required):
+% - ds              : dataset
+% - roisToPlot      : cell with ROI names
+% - useSTRetParams  : boolean flag to indicate if we use supplementary
+%                       spatiotemporal retinotopy PRF parameters
+% - spatialModel    : spatial components of pRF models
+% - temporalModel   : temporal components of pRF models
+% - subjnrs         : subject nrs from the fMRI experiment
+%
+% OUTPUTS:
+% - output          : struct with sample and resampled pRF parameters.
+%
+%% Define params
 if ~exist('useSTRetParams','var') || isempty(useSTRetParams)
     useSTRetParams = false;
 end

@@ -1,26 +1,39 @@
 function fH = plotDataModelFit_singleVoxel_StimulusConditionBlocks(projectDir,subjnrs,varargin)
-
-% Parse inputs
+% Function to visualize single voxel fMRI BOLD time series and model
+% predictions per stimulus condition.
+%
+% Show in the paper:
+% Title:   Rethinking simultaneous suppression in visual cortex via 
+%          compressive spatiotemporal population receptive fields.
+% Authors: Kupers, Kim, Grill-Spector (2024).
+% Journal: Nature Communications
+% DOI:     XXX
+%
+% Requires getting MRI data from OSF (see downloadDataTableFromOSF.m)
+%
+% Code written by E.R. Kupers (2024) Stanford University
+%
+%% Parse inputs
 p = inputParser;
 p.addRequired('projectDir', @ischar);
-p.addRequired('subjnrs', @isnumeric); % Subject nrs are: [1,2,3,7,8,9,10,11,12,13]
-p.addParameter('plotModelFlag',true, @islogical);
-p.addParameter('roisToPlot',[],@(x) (iscell(x) || isnumeric(x)));
-p.addParameter('roiType','stimcorner4_area4sq_eccen5',@ischar);
-p.addParameter('hemi','both',@(x) any(validatestring(x,{'lh','rh','both'})));
-p.addParameter('selectedDataVoxels',[],@isnumeric);
-p.addParameter('spatialModel',{'onegaussianFit','cssFit','onegaussianFit'}, @iscell);
-p.addParameter('temporalModel',{'1ch-glm','1ch-glm','3ch-stLN'}, @iscell);
-p.addParameter('mdllbl',{'LSS','CSS','CST'}, @iscell);
-p.addParameter('nrbslTRs',4,@isnumeric);
-p.addParameter('nrows',4, @isnumeric);
-p.addParameter('ncols',8, @isnumeric);
-p.addParameter('sbplOrder',[4,2,8,6,3,1,7,5], @isnumeric);
-p.addParameter('xl',19, @isnumeric);
-p.addParameter('maxTrial',[-5 15], @isnumeric);
-p.addParameter('saveFigs',false, @islogical);
-p.addParameter('saveFigDir',[],@ischar);
-p.addParameter('subDir',[],@ischar);
+p.addRequired('subjnrs', @isnumeric);                                      % Subject nrs are: [1,2,3,7,8,9,10,11,12,13]
+p.addParameter('plotModelFlag',true, @islogical);                          % Plot predicted voxel time series: yes or no?
+p.addParameter('roisToPlot',[],@(x) (iscell(x) || isnumeric(x)));          % Names or indices of the ROIs you want to plot voxel timeseries from
+p.addParameter('roiType','stimcorner4_area4sq_eccen5',@ischar);            % What type of sub-ROI do you want load data from?
+p.addParameter('hemi','both',@(x) any(validatestring(x,{'lh','rh','both'}))); % What hemisphere do you want to load data from?
+p.addParameter('selectedDataVoxels',[],@isnumeric);                        % What voxels do you want to plot?
+p.addParameter('spatialModel',{'onegaussianFit','cssFit','onegaussianFit'}, @iscell); % Spatial component of pRF model
+p.addParameter('temporalModel',{'1ch-glm','1ch-glm','3ch-stLN'}, @iscell); % Temporal component of pRF model
+p.addParameter('mdllbl',{'LSS','CSS','CST'}, @iscell);                     % Model label
+p.addParameter('nrbslTRs',4,@isnumeric);                                   % Number of baseline TRs in chopped block, until stim onset.
+p.addParameter('nrows',4, @isnumeric);                                     % Number of rows in figure
+p.addParameter('ncols',8, @isnumeric);                                     % Number of columns in figure
+p.addParameter('sbplOrder',[4,2,8,6,3,1,7,5], @isnumeric);                 % Subplot order in figure (i.e. SEQ/SIM Condition 1-8)
+p.addParameter('xl',[-5 15], @isnumeric);                                  % range of x-axis
+p.addParameter('maxTrial',19, @isnumeric);                                 % When do we cut off x-axis?
+p.addParameter('saveFigs',false, @islogical);                              % Save figures or not?
+p.addParameter('saveFigDir',[],@ischar);                                   % Save Figure dir
+p.addParameter('subDir',[],@ischar);                                       % Subdirectory of Figure dir
 p.parse(projectDir,subjnrs,varargin{:});
 
 % Rename variables
@@ -277,7 +290,6 @@ for subjnr  = subjnrs
                 % DATA + Linear Model
                 ax = subplot(nrows,ncols,sbpl+(3*ncols));  hold on;
                 plot(tTrial(tTrial<=maxTrial),zeros(1,length(tTrial(tTrial<=maxTrial))),'k', 'lineWidth',0.5); hold on;
-                plot(stimTime,[stimTrial+yl(1)+stimlift], 'color', 'k', 'lineWidth',2);
                 s = shadedErrorBar(tTrial(tTrial<=maxTrial),mns(tTrial<=maxTrial)', sems(tTrial<=maxTrial)',...
                     'lineProps',{'Color','k'});hold on;
                 s.mainLine.Visible = 'off';
@@ -307,7 +319,6 @@ for subjnr  = subjnrs
                     if isfield(p, 'model2')
                         subplot(nrows,ncols,sbpl+(2*ncols));
                         plot(tTrial(tTrial<=maxTrial),zeros(1,length(tTrial(tTrial<=maxTrial))),'k', 'lineWidth',0.5); hold on;
-                        plot(stimTime,[stimTrial+yl(1)+stimlift], 'color', 'k', 'lineWidth',2);
                         s = shadedErrorBar(tTrial(tTrial<=maxTrial),mns(tTrial<=maxTrial)', sems(tTrial<=maxTrial)',...
                             'lineProps',{'Color','k'});hold on;
                         s.mainLine.Visible = 'off';
@@ -326,7 +337,6 @@ for subjnr  = subjnrs
                     if isfield(p, 'model3')
                         subplot(nrows,ncols,sbpl+(1*ncols));
                         plot(tTrial(tTrial<=maxTrial),zeros(1,length(tTrial(tTrial<=maxTrial))),'k', 'lineWidth',0.5); hold on;
-                        plot(stimTime,[stimTrial+yl(1)+stimlift], 'color', 'k', 'lineWidth',2);
                         s = shadedErrorBar(tTrial(tTrial<=maxTrial),mns(tTrial<=maxTrial)', sems(tTrial<=maxTrial)',...
                             'lineProps',{'Color','k'});hold on;
                         s.mainLine.Visible = 'off';

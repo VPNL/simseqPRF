@@ -1,4 +1,4 @@
-function loc = getStimLocDeg(projectDir, subjnr, sessionNr, useStimFlag, forcedGridLoc, hemi, relativeSize, offset)
+function loc = getStimLocDeg(projectDir, subjnr, useStimFlag, forcedGridLoc, hemi, relativeSize, offset)
 % Define pRF XY centers that fall within stimulus squares
 
 if ~exist('useStimFlag','var') || isempty(useStimFlag)
@@ -22,7 +22,7 @@ else
 end
 
 %% Set up directories
-pths       = getSubjectPaths(projectDir,subjnr,sessionNr);
+pths       = getSubjectPaths(projectDir,subjnr);
 flipLR     = true;
 if strcmp(hemi, 'lh'), hemiIdx = 1; else hemiIdx = 2; end
 
@@ -44,14 +44,6 @@ if useStimFlag
         Y = Y(params.locationsIdx(hemiIdx));  
     end
     
-    % If we stored location in deg per square, use that
-%     if isfield(params, 'loc') && ~isempty(params.loc)
-%         stimXYCenter = repmat([X; Y],1,size(params.loc{sizeIdx},1));
-%         stimDiagCenter = [params.loc{sizeIdx}(:,[1,2],hemiIdx);
-%                          params.loc{sizeIdx}(:,[3,4],hemiIdx)];
-%         stimXbounds = params.loc{sizeIdx}(:,[1,3],hemiIdx) + offset + ([-1 1].*params.squareSizeDeg/2);
-%         stimYbounds = params.loc{sizeIdx}(:,[2,4],hemiIdx) + offset + ([-1 1].*params.squareSizeDeg/2);
-%     else
     pos = [];
     if size(flip.pos{end},1)>1
         if strcmp(hemi, 'lh'), hemiIdx = 1; else hemiIdx = 2; end
@@ -61,9 +53,6 @@ if useStimFlag
                 if length(tmp)==2
                     pos(ii) = tmp(hemiIdx);
                 elseif length(tmp)>2
-%                     start = (idx-1)*(length(tmp)/2);
-%                     stop = idx*(length(tmp)/2);
-%                     pos(ii,:) = tmp(start:stop);
                     pos(ii) = NaN;  
                 elseif ~isempty(tmp) 
                     pos(ii) = tmp;
@@ -114,7 +103,6 @@ end
 
 
 stimAngleCenter = rad2deg(atan(abs(stimXYCenter(:,2))./abs(stimXYCenter(:,1))))';
-% stimAngleBound = rad2deg(atan(abs(5)./abs(stimYbounds)));
 
 loc = struct();
 loc.units = 'deg';

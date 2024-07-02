@@ -1,10 +1,21 @@
 function fH = plotMeanSeqVsSimAmplitude_voxel(ds, lmmResults, varargin)
 % Function to plot average voxel SEQ block amplitude vs SIM block
 % amplitude, colored by pRF size. 
+%
+% From the paper:
+% Title:   Rethinking simultaneous suppression in visual cortex via 
+%          compressive spatiotemporal population receptive fields.
+% Authors: Kupers, Kim, Grill-Spector (2024).
+% Journal: Nature Communications
+% DOI:     XXX
+%
+% Requires getting MRI data from OSF (see downloadDataTableFromOSF.m)
+%
+% Code written by E.R. Kupers (2024) Stanford University
 % 
 % INPUTS (required):
 % - ds         : dataset
-% - lmmResults : struct with following fields:
+% - lmmResults : cell (1x number of ROIs), containing a struct with fields:
 %                       fixedIntercepts, fixedSlopes, 
 %                       fixedIntercepts_CI, fixedSlopes_CI
 % OUTPUTS:
@@ -13,27 +24,27 @@ function fH = plotMeanSeqVsSimAmplitude_voxel(ds, lmmResults, varargin)
 % Parse inputs
 p = inputParser;
 p.addRequired('ds');
-p.addRequired('lmmResults', @isstruct);
-p.addParameter('LMMlbl',[],@ischar);
-p.addParameter('subjnrs',[1:3,7:13],@isnumeric);
-p.addParameter('roisToPlot',[], @isnumeric);
-p.addParameter('roiType','stimcorner4_area4sq_eccen5',@ischar);
-p.addParameter('conditionNamesSimSeq',{'Small-0.2s','Small-1s','Big-0.2s','Big-1s'}, @iscell);
-p.addParameter('conditionOrderSimSeq',[1:4],@isnumeric);
-p.addParameter('ve_thresh',0.2, @isnumeric); % threshold in percentage noise ceiling from simseq exp
-p.addParameter('nc_thresh',0.1, @isnumeric); % threshold in percentage of pRF var expl. from toonotopy
-p.addParameter('plotAllSubjectsTogether',false, @islogical);
-p.addParameter('plotModelAmpl',false, @islogical);
-p.addParameter('whichModelToPlot','LSS', @ischar);
-p.addParameter('plotDataFlag',true, @islogical);
-p.addParameter('plotFitFlag',true, @islogical);
-p.addParameter('plotModelAmplSubj',false, @islogical);
-p.addParameter('saveFigs',true, @islogical);
-p.addParameter('saveFigDir',[],@ischar);
-p.addParameter('subDir',[],@ischar);
-p.addParameter('mrkrSz',24, @isnumeric);
-p.addParameter('edgesSz',[0:2:12], @isnumeric); % Color dots by pRF size (binned)
-p.addParameter('AlphaLevelMarker',1, @isnumeric);
+p.addRequired('lmmResults', @(x) (iscell(x) || isstruct(x)));
+p.addParameter('LMMlbl',[],@ischar);                                        % Label of LMM 
+p.addParameter('subjnrs',[1:3,7:13],@isnumeric);                            % Subject nrs are: [1,2,3,7,8,9,10,11,12,13]
+p.addParameter('roisToPlot',[], @isnumeric);                                % Indices of the ROIs you want to plot voxel timeseries from
+p.addParameter('roiType','stimcorner4_area4sq_eccen5',@ischar);             % What type of sub-ROI do you want load data from?
+p.addParameter('conditionNamesSimSeq',{'Small-0.2s','Small-1s','Big-0.2s','Big-1s'}, @iscell); % Names of stimulus conditions
+p.addParameter('conditionOrderSimSeq',[1:4],@isnumeric);                    % Order of stimulus conditions in figure
+p.addParameter('ve_thresh',0.2, @isnumeric);                                % threshold in percentage noise ceiling from simseq exp
+p.addParameter('nc_thresh',0.1, @isnumeric);                                % threshold in percentage of pRF var expl. from toonotopy
+p.addParameter('plotAllSubjectsTogether',false, @islogical);                % Plot all subject's voxel data in one panel
+p.addParameter('plotModelAmpl',false, @islogical);                          % Plot group model-based voxel amplitudes
+p.addParameter('whichModelToPlot','LSS', @ischar);                          % Name of model-based voxel amplitude data to plot
+p.addParameter('plotDataFlag',true, @islogical);                            % Plot individual data points
+p.addParameter('plotFitFlag',true, @islogical);                             % Plot linefit of LMM
+p.addParameter('plotModelAmplSubj',false, @islogical);                      % Plot single subject model-based voxel amplitudes
+p.addParameter('saveFigs',true, @islogical);                                % Save figures or not?
+p.addParameter('saveFigDir',[],@ischar);                                    % Save Figure dir
+p.addParameter('subDir',[],@ischar);                                        % Subdirectory of Figure dir
+p.addParameter('mrkrSz',24, @isnumeric);                                    % size of plotted data markers
+p.addParameter('edgesSz',[0:2:12], @isnumeric);                             % Color dots by pRF size (binned)
+p.addParameter('AlphaLevelMarker',1, @isnumeric);                           % Alpha level (transparency) of dots
 p.parse(ds,lmmResults,varargin{:});
 
 % Rename input variables
@@ -76,11 +87,18 @@ plotOrder = [2,1,4,3];
 if plotAllSubjectsTogether
     
     axRange = [-1,7];
-    if ~isfield(lmmResults,'fixedIntercepts') || ~isfield(lmmResults,'fixedSlopes') || ...
-            ~isfield(lmmResults,'fixedIntercepts_CI') || ~isfield(lmmResults,'fixedSlopes_CI')
-        error('[%s]: Group Slope and intercept w/ CI need to be an input variable', mfilename)
+    if isstruct(lmmResults)
+        if ~isfield(lmmResults,'fixedIntercepts') || ~isfield(lmmResults,'fixedSlopes') || ...
+                ~isfield(lmmResults,'fixedIntercepts_CI') || ~isfield(lmmResults,'fixedSlopes_CI')
+            error('[%s]: Group Slope and intercept w/ CI need to be an input variable', mfilename)
+        end
+    elseif iscell(lmmResults)
+        if ~isfield(lmmResults{roisToPlot(1)},'fixedIntercepts') || ~isfield(lmmResults{roisToPlot(1)},'fixedSlopes') || ...
+                ~isfield(lmmResults{roisToPlot(1)},'fixedIntercepts_CI') || ~isfield(lmmResults{roisToPlot(1)},'fixedSlopes_CI')
+            error('[%s]: Group Slope and intercept w/ CI need to be an input variable', mfilename)
+        end
     end
-    
+        
     if length(conditionOrderSimSeq)==1
         fH = figure; set(gcf,'Position',[60, 438, 1920, 474]); %[ 1  1 1920 950]);
         ncols = length(roisToPlot);
@@ -119,14 +137,14 @@ if plotAllSubjectsTogether
             if ~isempty(xToPlot)
                 if length(conditionOrderSimSeq)==1
                     subplot(1,ncols,idx); hold on;
-                    xlabel('SEQ (% signal)','FontSize',8);
-                    if idx==1, ylabel('SIM (% signal)','FontSize',8); end
+                    xlabel('SEQ ampl (BOLD % signal)','FontSize',8);
+                    if idx==1, ylabel('SIM ampl (BOLD % signal)','FontSize',8); end
                 else
                     subplot(1,ncols,plotOrder(c)); hold on;
-                    ylabel('SIM (% signal)','FontSize',8);
-                    xlabel('SEQ (% signal)','FontSize',8);
+                    ylabel('SIM ampl (BOLD % signal)','FontSize',8);
+                    xlabel('SEQ ampl (BOLD % signal)','FontSize',8);
                 end
-                title(sprintf('%s: %s',string(roisToPlot(idx)),  conditionNamesSimSeq{c}),'FontSize',10);
+                title(sprintf('%s: %s',string(roisToPlot(idx)), conditionNamesSimSeq{c}),'FontSize',10);
 
                 plot([-5 21],[0 0],'k','lineWidth',0.25)
                 plot([0 0],[-5 21],'k','lineWidth',0.25)
@@ -289,6 +307,7 @@ else
                     if plotFitFlag
                         plot(xToPlot,ypred,':','color','k','lineWidth',1.5); hold on;
                     end
+                    D(:,:,c) = [xToPlot(vIdx),yToPlot(vIdx),ypred];
                 end
             end
             

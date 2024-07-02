@@ -143,7 +143,7 @@ for subjnr  = subjnrs
                     dataFileToLoad = fullfile(dd(1).folder,dd(1).name);
                     predFileToLoad = fullfile(dataFolderBase,...
                         sprintf('%s_%s_cvfits', pths.subjID,modelName),...
-                        sprintf('%s_%s_%s_cvfitResults.mat', pths.subjID,rois{roi},modelName));
+                        sprintf('%s_%s_%s_cvfits.mat', pths.subjID,rois{roi},modelName));
                     
                     p.(modelName) = load(predFileToLoad);
                     

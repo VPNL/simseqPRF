@@ -1,7 +1,36 @@
 function fH = makeSupplFigure8_STRetParams_TimeSeriesPredictionsRsquared(projectDir,...
-    allDS,modelName,roisToPlot,temporalModel, spatialModel, subjnrs, saveFigs, saveFigDir)
-
-%%% Set params
+    allDS,roisToPlot,temporalModel, spatialModel, subjnrs, saveFigs, saveFigDir)
+% Function to reproduce supplementary manuscript figure 8: 
+% panel a/b: V1 time series + CSTfix, CSTopt, DN-ST model prediction for each stimulus condition 
+% panel b: violin plots showing cross-validated R^2 for CSTfix, CSTopt, DN-ST pRF models
+% panel c: Difference in cv-R^2 between CSTfix, CSTopt, DN-ST models, 
+% for all ROIs except IPS0/1 (due to insufficient nr of subjects with data in this ROI)
+%
+% From the paper:
+% Title:   Rethinking simultaneous suppression in visual cortex via 
+%          compressive spatiotemporal population receptive fields.
+% Authors: Kupers, Kim, Grill-Spector (2024).
+% Journal: Nature Communications
+% DOI:     XXX
+%
+% Requires getting MRI data from OSF (see downloadDataTableFromOSF.m)
+%
+% Code written by E.R. Kupers (2024) Stanford University
+% 
+% INPUTS (required):
+% - projectDir
+% - allDS           : cell (3x) of datasets for each pRF model
+% - roisToPlot      : cell with ROI names
+% - spatialModel    : spatial components of pRF models
+% - temporalModel   : temporal components of pRF models
+% - subjnrs         : Subjects to plot
+% - saveFigs        : save figures or not?
+% - saveFigDir      : folder to save figures
+%
+% OUTPUTS:
+% - fH         : figure handle  
+%
+%% Set params
 cmapModels = getColormapPRFModels(3);
 
 % Get resampled data

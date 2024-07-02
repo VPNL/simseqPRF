@@ -5,7 +5,9 @@ function fH = plotLMMfittedRegressionSlopes(ds,lmmResults,LMMOrder, roisToPlot,c
 %   ex: plotLMMfittedRegressionSlopes(LMMResults,{'Data'}, false)
 % To plot Figure 7, "LMMResults" struct has fields with size {4,nrROIs}
 %   ex: plotLMMfittedRegressionSlopes(LMMResults,{'LSS','CSS','CST','Data'}, false)
-
+%
+% Code written by E.R. Kupers (2024) Stanford University
+%
 %% Check inputs
 if size(lmmResults,1) == 1 && size(lmmResults.fixedSlopes,1)==1
     plotModelAmpl = false;

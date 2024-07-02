@@ -1,5 +1,26 @@
-function fH = makeSupplFigure2_SimulateModelPredictions(saveFigs)
-% Simulate neural and BOLD predictions by pRF models
+function fH = makeSupplFigure3_SimulateModelPredictions(saveFigs,saveFigDir)
+% Function to reproduce supplementary figure 3:  
+% panel B: Simulate neural and BOLD predictions by pRF models
+%
+% From the paper:
+% Title:   Rethinking simultaneous suppression in visual cortex via 
+%          compressive spatiotemporal population receptive fields.
+% Authors: Kupers, Kim, Grill-Spector (2024).
+% Journal: Nature Communications
+% DOI:     XXX
+%
+% Requires getting MRI data from OSF (see downloadDataTableFromOSF.m)
+%
+% Code written by E.R. Kupers (2024) Stanford University
+% 
+% INPUTS (required):
+% - saveFigs        : save figures or not?
+% - saveFigDir      : folder to save figures
+%
+% OUTPUTS:
+% - fH         : figure handle
+%
+%%
 projectDir = simseqRootPath;
 subjnr  = 1;
 pths    = getSubjectPaths(projectDir, subjnr);
@@ -226,13 +247,13 @@ for idx = 1:length(idx_voxel)
     end
     
     if saveFigs
-        saveFigDir = fullfile(simseqRootPath, 'results','group');
-        subDir = 'supplFig2';
+        subDir = 'supplFig3';
         if ~exist(fullfile(saveFigDir,subDir),'dir')
             mkdir(fullfile(saveFigDir,subDir)); 
         end
-        printName = sprintf('%s%s%d_200ms_SimSeq',params.analysis.spatialModel,params.analysis.temporalModel,idx_voxel(idx));
-        print(gcf,'-depsc2','-painters','-r300','-loose',fullfile(saveFigDir,subDir,printName));
+        fName = sprintf('supplFig3_%s%s%d_200ms_SimSeq',params.analysis.spatialModel,params.analysis.temporalModel,idx_voxel(idx));
+        saveas(gcf, fullfile(thisSaveFigDir, [fName '.png']))
+%         print(gcf,'-depsc2','-painters','-r300','-loose',fullfile(saveFigDir,subDir,fName));
     end
 end
 

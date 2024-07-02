@@ -1,6 +1,29 @@
-function fH = makeSupplFigure3_DistributionCSTExponents(ds,roisToPlot,cmapROIs,saveFigs)
-
-% Define distribution params
+function fH = makeSupplFigure4_DistributionCSTExponents(ds,roisToPlot,cmapROIs,saveFigs, saveFigDir)
+% Function to reproduce supplementary figure 4: 
+% Plotting the distribution of fitted CST pRF exponents
+%
+% From the paper:
+% Title:   Rethinking simultaneous suppression in visual cortex via 
+%          compressive spatiotemporal population receptive fields.
+% Authors: Kupers, Kim, Grill-Spector (2024).
+% Journal: Nature Communications
+% DOI:     XXX
+%
+% Requires getting MRI data from OSF (see downloadDataTableFromOSF.m)
+%
+% Code written by E.R. Kupers (2024) Stanford University
+% 
+% INPUTS (required):
+% - ds              : dataset
+% - roisToPlot      : cell with ROI names
+% - cmapROIs        : color map for ROIs
+% - saveFigs        : save figures or not?
+% - saveFigDir      : folder to save figures
+%
+% OUTPUTS:
+% - fH         : figure handle
+%
+%% Define distribution params
 nbins   = 20;
 nboot   = 1000;
 binsExp = linspace(0.075,1.025,nbins);
@@ -93,8 +116,8 @@ sgtitle(sprintf('Group summary gridfit CST exponent (mean +/- SEM), with mode (t
 
 % Save figure
 if saveFigs
-    fName = sprintf('SummaryGroupMedian_GridFitExp');
-    thisSaveFigDir = fullfile(saveFigDir, 'sfig3');
+    fName = sprintf('supplfig4_SummaryGroupMedian_GridFitExp');
+    thisSaveFigDir = fullfile(saveFigDir, 'supplfig4');
     if ~exist(thisSaveFigDir,'dir'); mkdir(thisSaveFigDir); end
     saveas(gcf, fullfile(thisSaveFigDir, [fName '.png']))
 %     print(gcf,fullfile(thisSaveFigDir,fName),'-depsc')
