@@ -1,4 +1,4 @@
-function fH = plotMeanSeqVsSimAmplitude_voxel(ds, lmmResults, varargin)
+function fH = plotMeanSeqVsSimAmplitude_voxel(ds, fLMM, lmmResults, varargin)
 % Function to plot average voxel SEQ block amplitude vs SIM block
 % amplitude, colored by pRF size. 
 %
@@ -24,6 +24,7 @@ function fH = plotMeanSeqVsSimAmplitude_voxel(ds, lmmResults, varargin)
 % Parse inputs
 p = inputParser;
 p.addRequired('ds');
+p.addRequired('fLMM', @(x) (iscell(x) || isstruct(x)));
 p.addRequired('lmmResults', @(x) (iscell(x) || isstruct(x)));
 p.addParameter('LMMlbl',[],@ischar);                                        % Label of LMM 
 p.addParameter('subjnrs',[1:3,7:13],@isnumeric);                            % Subject nrs are: [1,2,3,7,8,9,10,11,12,13]
@@ -45,7 +46,7 @@ p.addParameter('subDir',[],@ischar);                                        % Su
 p.addParameter('mrkrSz',24, @isnumeric);                                    % size of plotted data markers
 p.addParameter('edgesSz',[0:2:12], @isnumeric);                             % Color dots by pRF size (binned)
 p.addParameter('AlphaLevelMarker',1, @isnumeric);                           % Alpha level (transparency) of dots
-p.parse(ds,lmmResults,varargin{:});
+p.parse(ds,fLMM,lmmResults,varargin{:});
 
 % Rename input variables
 fnToRename = fieldnames(p.Results);
@@ -87,16 +88,13 @@ plotOrder = [2,1,4,3];
 if plotAllSubjectsTogether
     
     axRange = [-1,7];
-    if isstruct(lmmResults)
-        if ~isfield(lmmResults,'fixedIntercepts') || ~isfield(lmmResults,'fixedSlopes') || ...
-                ~isfield(lmmResults,'fixedIntercepts_CI') || ~isfield(lmmResults,'fixedSlopes_CI')
-            error('[%s]: Group Slope and intercept w/ CI need to be an input variable', mfilename)
-        end
-    elseif iscell(lmmResults)
-        if ~isfield(lmmResults{roisToPlot(1)},'fixedIntercepts') || ~isfield(lmmResults{roisToPlot(1)},'fixedSlopes') || ...
-                ~isfield(lmmResults{roisToPlot(1)},'fixedIntercepts_CI') || ~isfield(lmmResults{roisToPlot(1)},'fixedSlopes_CI')
-            error('[%s]: Group Slope and intercept w/ CI need to be an input variable', mfilename)
-        end
+    if isstruct(fLMM) && (~isfield(fLMM,'fixedIntercepts') || ~isfield(fLMM,'fixedSlopes') || ...
+            ~isfield(fLMM,'fixedIntercepts_CI') || ~isfield(fLMM,'fixedSlopes_CI'))
+        error('[%s]: Group Slope and intercept w/ CI need to be an input variable', mfilename)
+        
+    elseif isstruct(lmmResults) && (~isfield(lmmResults,'fixedIntercepts') || ~isfield(lmmResults,'fixedSlopes') || ...
+            ~isfield(lmmResults,'fixedIntercepts_CI') || ~isfield(lmmResults,'fixedSlopes_CI'))
+        error('[%s]: Group Slope and intercept w/ CI need to be an input variable', mfilename)
     end
         
     if length(conditionOrderSimSeq)==1
