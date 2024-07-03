@@ -12,14 +12,14 @@ plIdx = 1;
 % Get max noise ceiling across subjects
 mdGroupNC = max(maxNC, [], 'omitnan').*100;
 
+modelOrder = [3,2,1]; % CST, CSS, LSS
+cmapModels = cmapModels(modelOrder,:);
+modelNames = modelNames(modelOrder);
 for idx = 1:length(roisToPlot)
     clear dataToPlot
   
-    dataToPlot{3} = squeeze(resampledCVR2(:,idx,1,:));
-    dataToPlot{2} = squeeze(resampledCVR2(:,idx,2,:));
-    dataToPlot{1} = squeeze(resampledCVR2(:,idx,3,:));
-    
-    for mm = 1:3
+    for mm = 1:length(modelOrder)
+        dataToPlot{mm} = squeeze(resampledCVR2(:,idx,modelOrder(mm),:)); 
         median_dataToPlot{mm} = median(dataToPlot{mm}(:),'omitnan');
     end
     
