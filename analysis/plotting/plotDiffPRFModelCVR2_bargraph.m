@@ -52,7 +52,7 @@ end
 xlim([0 10]); ylim([-7 20]); box off
 set(gca,'XTick',[1:length(roisToPlot)], 'XTickLabel',string(roisToPlot),'XTickLabelRotation',45)
 l = gca;
-legend(l.Children([length(l.Children):-1:1]),modelDiffNamesNewOrder, 'FontSize',9, 'Location','NorthWest'); 
+legend(l.Children([length(l.Children):-1:1]),modelDiffNamesNewOrder, 'FontSize',9, 'Location','NorthEast'); 
 legend boxoff
 sgtitle('Group Average cv-R^2 mean +/- SEM per visual area')
 ylabel('Cross-validated variance explained (%)')
