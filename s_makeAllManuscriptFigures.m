@@ -116,14 +116,14 @@ if strcmp(figureGroup,'main')
     fH3 = makeFigure3_exampleVO12Data(ds, fLMM, lmmResults, projectDir,subjnr, saveFigs, saveFigDir);
 
     %% FIGURE 4:
-    fH4 = makeFigure4_SuppressionLevelsAcrossVisualAreas(ds,lmmResults,roisToPlot,cmapROIs, ...
+    fH4 = makeFigure4_SuppressionLevelsAcrossVisualAreas(ds,fLMM,lmmResults,roisToPlot,cmapROIs, ...
                                                             useSTRetParams, saveFigs, saveFigDir);
 
     %% FIGURE 6 & Suppl Table 3:
     fH6 = makeFigure6_PRFModelFits(ds,roisToPlot,spatialModel,temporalModel,saveFigs, saveFigDir);
 
     %% FIGURE 7:
-    fH7 = makeFigure7_PredictedSuppressionLevels(lmmResults, lmmResults_Model,roisToPlot,cmapROIs,saveFigs,saveFigDir);
+    fH7 = makeFigure7_PredictedSuppressionLevels(lmmResults,lmmResults_Model,roisToPlot,cmapROIs,saveFigs,saveFigDir);
 
     %% FIGURE 8:
     fH8 = makeFigure8_SuppressionLevels_v_pRFParams(ds,lmmResults,roisToPlot,...
