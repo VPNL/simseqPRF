@@ -48,7 +48,6 @@ fH(3) = plotPRFModelCVRSQ_violinPlot(ds,output.resampledCVR2,output.maxNC,roisTo
 fH(4) = plotDiffPRFModelCVR2_bargraph(output.mean_diffCVR2,roisToPlot,saveFigs, saveFigDir);
 
 %% Do some statistics (ANOVA)
-
 useAdjustedR2 = false; % Do we want to adjust for the nr of regressors in pRF models 
                        % (CST having 1 more than LSS and CSS).
 nrTimePoints = 648;
