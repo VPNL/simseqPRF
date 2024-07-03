@@ -98,15 +98,15 @@ if plotAllSubjectsTogether
     end
         
     if length(conditionOrderSimSeq)==1
-        fH = figure; set(gcf,'Position',[60, 438, 1920, 474]); %[ 1  1 1920 950]);
+        fH = figure; set(gcf,'Position',[60, 438, 1920, 474]);
         ncols = length(roisToPlot);
+        nrows = 1;
+    elseif length(conditionOrderSimSeq)>1
+        fH = figure; set(gcf,'Position',[60, 438, 1920, 474]);
+        ncols = length(conditionOrderSimSeq);
+        nrows = length(roisToPlot);
     end
     for idx = 1:length(roisToPlot)
-        if length(conditionOrderSimSeq)>1
-            fH = figure(50); clf; set(gcf,'Position',[60, 438, 1920, 474]); %[ 1  1 1920 950]);
-            ncols = length(conditionOrderSimSeq);
-        end
-        
         % Get PRF CST size
         szCSTToPlot = ds.pRFCSTsize(...
             ds.ROI==nominal(roisToPlot(idx)) & ...
@@ -134,11 +134,11 @@ if plotAllSubjectsTogether
             end
             if ~isempty(xToPlot)
                 if length(conditionOrderSimSeq)==1
-                    subplot(1,ncols,idx); hold on;
-                    xlabel('SEQ ampl (BOLD % signal)','FontSize',8);
+                    subplot(nrows,ncols,idx); hold on;
+                    if idx==5, xlabel('SEQ ampl (BOLD % signal)','FontSize',8); end
                     if idx==1, ylabel('SIM ampl (BOLD % signal)','FontSize',8); end
                 else
-                    subplot(1,ncols,plotOrder(c)); hold on;
+                    subplot(nrows,ncols,plotOrder(c)); hold on;
                     ylabel('SIM ampl (BOLD % signal)','FontSize',8);
                     xlabel('SEQ ampl (BOLD % signal)','FontSize',8);
                 end
@@ -157,12 +157,14 @@ if plotAllSubjectsTogether
                     scatter(xToPlot(vIdx),yToPlot(vIdx),mrkrSz, szCSTToPlot(vIdx),'filled',...
                         'MarkerEdgeColor',[1 1 1],'MarkerEdgeAlpha',AlphaLevelMarker,...
                         'MarkerFaceAlpha',AlphaLevelMarker); hold on;
-                    cb = colorbar; cb.Position = cb.Position + 0.01;
+                    cb = colorbar; 
+                    cb.Position = cb.Position + 0.01;
                     colormap(cmapSz);
                     set(gca, 'CLim', [edgesSz(1),edgesSz(end)]);
                     cb.Label.String = 'effective pRF size (deg)';
                     cb.TickDirection = 'out'; cb.Box = 'off';
                     cb.Ticks = edgesSz;
+                    if idx<length(roisToPlot), cb.Visible = "off"; end
                 end
                 
                 if plotFitFlag
@@ -188,7 +190,7 @@ if plotAllSubjectsTogether
                 end
             end
         end
-        
+    end  
         if (ve_thresh > 0) || (nc_thresh > 0)
             if plotModelAmpl
                 sgtitle(sprintf('All Subjects: Seq vs Sim predicted amplitudes by %s (voxels with pRF ve>%1.1f & nc>%1.1f)', ...
@@ -205,33 +207,33 @@ if plotAllSubjectsTogether
                 sgtitle('All Subjects: Seq vs Sim amplitudes (all voxels)')
             end
         end
-        
-        % Save figure
-        if saveFigs
-            if plotModelAmpl
-                fName = sprintf('Summary%sAllSubjects_SEQvsSIM_%sModelAmpl_XVal1_%s',...
-                    replace(string(roisToPlot(idx)),'/',''), whichModelToPlot, roiType);
-            else
-                fName = sprintf('Summary%sAllSubjects_SEQvsSIMAmpl_XVal1_%s',...
-                    replace(string(roisToPlot(idx)),'/',''), roiType);
-            end
-            if plotFitFlag
-                fName = sprintf('%s_LMMfit_%s',fName, LMMlbl);
-                if plotDataFlag
-                    fName = [fName '_wData'];
-                else
-                    fName = [fName '_noData'];
-                end
-            else
-                fName = sprintf('%s_dataOnly',fName);
-            end
-            
-            thisSaveFigDir = fullfile(saveFigDir);
-            if ~exist(thisSaveFigDir,'dir'); mkdir(thisSaveFigDir); end
-            saveas(gcf, fullfile(thisSaveFigDir, [fName '.png']))
-%             print(gcf,fullfile(thisSaveFigDir,fName),'-depsc')
+
+    % Save figure
+    if saveFigs
+        if plotModelAmpl
+            fName = sprintf('Summary%sAllSubjects_SEQvsSIM_%sModelAmpl_XVal1_%s',...
+                replace(string(roisToPlot(idx)),'/',''), whichModelToPlot, roiType);
+        else
+            fName = sprintf('Summary%sAllSubjects_SEQvsSIMAmpl_XVal1_%s',...
+                replace(string(roisToPlot(idx)),'/',''), roiType);
         end
+        if plotFitFlag
+            fName = sprintf('%s_LMMfit_%s',fName, LMMlbl);
+            if plotDataFlag
+                fName = [fName '_wData'];
+            else
+                fName = [fName '_noData'];
+            end
+        else
+            fName = sprintf('%s_dataOnly',fName);
+        end
+        
+        thisSaveFigDir = fullfile(saveFigDir);
+        if ~exist(thisSaveFigDir,'dir'); mkdir(thisSaveFigDir); end
+        saveas(gcf, fullfile(thisSaveFigDir, [fName '.png']))
+        %             print(gcf,fullfile(thisSaveFigDir,fName),'-depsc')
     end
+    
     
     %% Plot subjects separately
 else

@@ -371,11 +371,11 @@ for subjnr  = subjnrs
                 thispRF.y0 = p.model3.y0(vv);
                 thispRF.effectiveSize = p.model3.szeff(vv);
                 thispRF.varexpl = p.model3.ve(vv);
-                thispRF.exp = p.model3.exp(vv);
+                thispRF.exp = p.model2.exp(vv);
                 ax1 = plotpRFlocOnImage(ax1,thispRF, stim, [], 'both');
                 title(sprintf('pRF %d:[%2.1f,%2.1f], sz=%2.2f, ve=%1.2f, css_n=%1.2f, cst_n=%1.2f, beta_s=%2.1f,beta_t=%2.1f', ...
                     vv,p.model3.x0(vv),p.model3.y0(vv),p.model3.szeff(vv),...
-                    p.model3.ve(vv),p.model3.exp(vv),p.model3.exp_temporal(vv),...
+                    p.model3.ve(vv),p.model2.exp(vv),p.model3.exp_temporal(vv),...
                     p.model3.beta_s(vv),p.model3.beta_t(vv)), 'FontSize',9)
                 xlabel(''); set(gca,'FontSize',9)
             end

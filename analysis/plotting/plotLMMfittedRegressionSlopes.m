@@ -40,6 +40,7 @@ end
 %% Plot it!
 
 fH = figure; clf; set(gcf,'Position',[669 30 1342 905]);
+
 dataMat = reshape(cell2mat(lmmResults(end).fixedSlopes),4,[]);
 seMat = reshape(cell2mat(lmmResults(end).fixedSlopes_SE),4,[]);
 
@@ -73,6 +74,7 @@ for mm = 1:length(LMMOrder)
 
     for c = conditionOrderSimSeq
         subplot(1,4,subplotOrder(c)); hold all;
+        plot([0.2 9.7],[1 1],'k--');
         cData = repmat(dataMat(c,:),2,1);
         seData = repmat(seMat(c,:),2,1);
         
@@ -125,7 +127,7 @@ if plotModelAmpl
         legend(l.Children([length(l.Children):-30:1]),LMMOrder{1:3}, 'FontSize',9, 'Location','SouthWest'); legend boxoff
     end
 else
-    legend(l.Children([length(l.Children):-3:1]),string(roisToPlot), 'FontSize',9, 'Location','SouthWest'); legend boxoff
+    legend(l.Children([length(l.Children)-3:-3:1]),string(roisToPlot), 'FontSize',9, 'Location','SouthWest'); legend boxoff
     sgtitle('Group Average Data: LMM regression slopes (Mean +/-SE)')
 end
 
