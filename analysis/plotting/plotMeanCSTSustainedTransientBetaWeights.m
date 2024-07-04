@@ -3,8 +3,6 @@ function fH = plotMeanCSTSustainedTransientBetaWeights(mean_resampledBetavalSust
 
 % Set colors
 roiColors = getROISummaryColors(0);
-newROIOrder = [1,2,3,4,5,8,9,6,7];
-roiColors = roiColors(newROIOrder,:);
 white = [1 1 1];
 
 % Compute grand mean + SEM across subjects

@@ -24,7 +24,7 @@ function fH = makeSupplFigure5_eyefixation(projectDir,subjnrs,saveFigs,saveFigDi
 %
 %% Check inputs
 if ~exist('subjnrs','var') || isempty(subjnrs)
-    subjnrs = [1,2,3,7,12];
+    subjnrs = [1,2,3,4,9];
 end
 if ~ismember(subjnrs,[1,2,3,7,12])
     error('[%]: Check subject nrs, not all subjects have eye tracking data',mfilename)
@@ -155,6 +155,9 @@ plot(mean(mnMdRun(:,1),1,'omitnan'),mean(mnMdRun(:,2),1,'omitnan'),'+r','markers
 
 if saveFigs
     fName = sprintf('supplFig5_eyetracking_XYDensity_wContours');
+    if ~exist(fullfile(saveFigDir,'supplFig5'),'dir')
+        mkdir(fullfile(saveFigDir,'supplFig5'));
+    end
     saveas(gcf,fullfile(saveFigDir,'supplFig5',[fName '.png']))
     %     print(gcf,fullfile(saveFigDir,fName),'-depsc','-painters','-r300','-loose');
 end

@@ -10,8 +10,8 @@ for idx = 1:size(deltaIdx,1)
     grandMean    = mean(deltasGroup(:,idx),1); % same as mean(mean(deltasSubj{idx},2)));
     grandSEM     = std(mean(deltasSubj{idx},2,'omitnan'),[],'omitnan')./sqrt(length(mean(deltasSubj{idx},2,'omitnan')));
     scatter(currMnSz,grandMean,100,cmapROIs(idx+1,:),'o','filled','MarkerEdgeColor',[0 0 0]); hold on;
-    plot(currMnSz+[-currSEMSz,currSEMSz],[grandMean,grandMean],'k-');
-    plot([currMnSz,currMnSz],grandMean+[-grandSEM,grandSEM],'k-');
+    plot(currMnSz+[-currSEMSz,currSEMSz],[grandMean,grandMean],'color',cmapROIs(idx+1,:));
+    plot([currMnSz,currMnSz],grandMean+[-grandSEM,grandSEM],'color',cmapROIs(idx+1,:));
 end
 
 title('Group Average +/- SEM: prf size vs Delta suppression slope','FontSize',13)

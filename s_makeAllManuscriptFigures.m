@@ -106,6 +106,7 @@ else
     roisToPlot = allRoisToPlot(newROIOrder);
 end
 
+%%
 if strcmp(figureGroup,'main')
     %% FIGURE 2:
     subjnr = 3;
@@ -123,17 +124,17 @@ if strcmp(figureGroup,'main')
     fH6 = makeFigure6_PRFModelFits(ds,roisToPlot,spatialModel,temporalModel,saveFigs, saveFigDir);
 
     %% FIGURE 7:
-    fH7 = makeFigure7_PredictedSuppressionLevels(lmmResults,lmmResults_Model,roisToPlot,cmapROIs,saveFigs,saveFigDir);
+    fH7 = makeFigure7_PredictedSuppressionLevels(ds,lmmResults,lmmResults_Model,roisToPlot,cmapROIs,saveFigs,saveFigDir);
 
     %% FIGURE 8:
-    fH8 = makeFigure8_SuppressionLevels_v_pRFParams(ds,lmmResults,roisToPlot,...
-                        cmapROIs,spatialModel,temporalModel,saveFigs,saveFigDir);
+    fH8 = makeFigure8_SuppressionLevels_v_pRFParams(ds,lmmResults,subjnrs,roisToPlot,...
+                        cmapROIs,spatialModel,temporalModel,useSTRetParams,saveFigs,saveFigDir);
 
     %% SUPPLEMENTARY FIGURE 1: Sim vs Seq scatter plots: All visual areas & all conditions
     fHS1 = plotMeanSeqVsSimAmplitude_voxel(ds, fLMM, lmmResults, ...
         'plotAllSubjectsTogether', true);
 
-    %% SUPPLEMENTARY FIGURE 2: Delta suppresion levels across the visual hierarchy
+    %% SUPPLEMENTARY FIGURE 2: Difference in suppresion levels across the visual hierarchy
     fHS2 = makeSupplFigure2_SuppressionDeltas(ds,lmmResults,roisToPlot, ...
                     cmapROIs,subjnrs,useSTRetParams,temporalModel, spatialModel, ...
                     saveFigs,saveFigDir);

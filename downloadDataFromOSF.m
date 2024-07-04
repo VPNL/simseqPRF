@@ -1,4 +1,4 @@
-function [] = downloadDataTableFromOSF(dataType, varargin)
+function [] = downloadDataFromOSF(dataType, varargin)
 % Function to download data presented in the paper:
 % Title:   Rethinking simultaneous suppression in visual cortex via 
 %          compressive spatiotemporal population receptive fields.
@@ -21,10 +21,11 @@ function [] = downloadDataTableFromOSF(dataType, varargin)
 % 3: Summary data table and time series for suppl figure 8-9 (CSTopt, DN-ST)
 % 4: Subject's preproc simseq fMRI modelfits (main)
 % 5: Subject's preproc simseq fMRI data (main)
-% 6: Subject's stimulus runs
-% 7: Subject's behavioral data
+% 6: Subject's stimulus runs & example trial for simulation in Suppl Fig 3
+% 7: Subject's behavioral data 
 % 8: DoG suppl material: Subject's simulated fMRI data and model voxel time series
 % 9: stRet suppl material: Subject's preprocessed fMRI data and model voxel time series
+% 10: Eyetracking data
 %
 % OUTPUTS:
 % None
@@ -107,22 +108,32 @@ switch dataType
         
     case 6 % Subject's stimulus runs
         fprintf('Subject''s stimulus runs..')
-        dataStr = {'mgkfh','c4kyd'; '2t6q5','tp3sf'; 'hnykp','df9rk'; ... subj01, subj02, subj03
-            'aqmfc','49rq3';'tsw8v','34fgx'; 'g852a','kysuq'; ... subj07, subj07, subj09
-            '7hgbf','rfng2';'54t7c','x7srj';'mdbv3','jqxvp'; ... subj10, subj11, subj12
-            '96uxt','9p6yh'};
-        % Loop over subjects
-        for s = 1:length(subjToLoad)
-            fprintf('s%d.',subjToLoad(s)); drawnow;
-            subjnr = subjToLoad(s);
-            pths = getSubjectPaths(fullfile(simseqRootPath), subjnr);
-            writeDir = fullfile(simseqRootPath,'data','stimuli',subjStr{subjnr});
+        dataStr = {'mgkfh','c4kyd'; '2t6q5','tp3sf'; 'hnykp','df9rk'; ... 2x subj01, subj02, subj03
+            'aqmfc','49rq3';'tsw8v','34fgx'; 'g852a','kysuq'; ... 2x subj07, subj07, subj09
+            '7hgbf','rfng2';'54t7c','x7srj';'mdbv3','jqxvp'; ... 2x subj10, subj11, subj12
+            '96uxt','9p6yh'; 'qc2uv', []}; % 2x subj13 + example trial
+        if isempty(subjToLoad),
+            fprintf('example trial.'); drawnow;
+            writeDir = fullfile(simseqRootPath,'data','stimuli','simulation');
             if ~exist(writeDir,'dir'), mkdir(writeDir); end
-            for r = [1,2]
-                readPth = fullfile(urlBase,dataStr{subjnr,r},'?action=download&version=1');
-                fName = sprintf('stim_simseq_run%d_v%d.mat',r,pths.expversionNr);
-                writePth = fullfile(writeDir,fName);
-                websave(writePth,readPth);
+            readPth = fullfile(urlBase,dataStr{end-1},'?action=download&version=1');
+            fName = 'images_and_sequenceWith33msGap_run1.mat';
+            writePth = fullfile(writeDir,fName);
+            websave(writePth,readPth);
+        else
+            % Loop over subjects
+            for s = 1:length(subjToLoad)
+                fprintf('s%d.',subjToLoad(s)); drawnow;
+                subjnr = subjToLoad(s);
+                pths = getSubjectPaths(fullfile(simseqRootPath), subjnr);
+                writeDir = fullfile(simseqRootPath,'data','stimuli',subjStr{subjnr});
+                if ~exist(writeDir,'dir'), mkdir(writeDir); end
+                for r = [1,2]
+                    readPth = fullfile(urlBase,dataStr{subjnr,r},'?action=download&version=1');
+                    fName = sprintf('stim_simseq_run%d_v%d.mat',r,pths.expversionNr);
+                    writePth = fullfile(writeDir,fName);
+                    websave(writePth,readPth);
+                end
             end
         end
         
@@ -197,5 +208,19 @@ switch dataType
         else
             error('\n[%s]: Download unsuccessful, please check\n',mfilename)
         end
+        
+             
+        
+    case 10 % eyetracking
+        fprintf('Eyetracking data..')
+        dataStr = {'jgv9c'}; % all subject data                
+        writeDir = fullfile(simseqRootPath,'data','eyetracking');
+        if ~exist(writeDir,'dir'), mkdir(writeDir); end
+        readPth = fullfile(urlBase,dataStr{1},'?action=download&version=1');
+        fName = sprintf('S1_S2_S3_S4_S9_eyetrackingDataClean.mat');
+        writePth = fullfile(writeDir,fName);
+        websave(writePth,readPth);
+        unzip(writePth,fullfile(writeDir,fName))
+end
         
 end

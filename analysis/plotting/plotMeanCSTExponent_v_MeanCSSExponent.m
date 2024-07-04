@@ -12,11 +12,11 @@ for idx = 1:length(roisToPlot)
   
     plot([0, 1], [0, 1], 'k:');   hold all;
     scatter(groupMeanOfMedianCSTExp,groupMeanOfMedianCSSExp,100,cmapROIs(idx,:),'filled','MarkerEdgeColor',[0 0 0]);
-    plot([groupMeanOfMedianCSTExp,groupMeanOfMedianCSTExp],groupMeanOfMedianCSSExp+[-groupSEMOfMedianCSSExp, groupSEMOfMedianCSSExp],'k');
-    plot(groupMeanOfMedianCSTExp+[-groupSEMOfMedianCSTExp,groupSEMOfMedianCSTExp],[groupMeanOfMedianCSSExp,groupMeanOfMedianCSSExp],'k');
+    plot([groupMeanOfMedianCSTExp,groupMeanOfMedianCSTExp],groupMeanOfMedianCSSExp+[-groupSEMOfMedianCSSExp, groupSEMOfMedianCSSExp],'color',cmapROIs(idx,:));
+    plot(groupMeanOfMedianCSTExp+[-groupSEMOfMedianCSTExp,groupSEMOfMedianCSTExp],[groupMeanOfMedianCSSExp,groupMeanOfMedianCSSExp],'color',cmapROIs(idx,:));
     
     box off; axis square
-    ylabel('median CSS pRF exp (a.u.)'); xlabel('median CST pRF exp (a.u.)')
+    ylabel('median CSS pRF exponent'); xlabel('median CST pRF exponent')
     xlim([0, 1]); ylim([0 1]);
 end
 l = gca;

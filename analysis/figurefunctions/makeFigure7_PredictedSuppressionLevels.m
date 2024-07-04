@@ -1,4 +1,4 @@
-function fH = makeFigure7_PredictedSuppressionLevels(lmmResults, lmmResults_Model,roisToPlot,cmapROIs,saveFigs,saveFigDir)
+function fH = makeFigure7_PredictedSuppressionLevels(ds,lmmResults, lmmResults_Model,roisToPlot,cmapROIs,saveFigs,saveFigDir)
 % Function to reproduce main manuscript figure 7: 
 % Suppression level (LMM  slopes) vs model-based (predicted) suppression
 % level by each pRF model (LSS,CSS,CST)
@@ -34,7 +34,7 @@ all_lmmResults = cat(1,lmmResults_Model,lmmResults);
 
 LMMOrder = {'LSS','CSS','CST','Data'};
 useSTRetParams = false;
-fH = plotLMMfittedRegressionSlopes(all_lmmResults,LMMOrder,roisToPlot,cmapROIs, useSTRetParams, saveFigs, saveFigDir);
+fH = plotLMMfittedRegressionSlopes(ds,all_lmmResults,LMMOrder,roisToPlot,cmapROIs, useSTRetParams, saveFigs, saveFigDir);
 
 return
 

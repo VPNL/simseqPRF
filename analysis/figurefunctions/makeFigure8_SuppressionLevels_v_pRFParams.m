@@ -1,5 +1,5 @@
-function fH = makeFigure8_SuppressionLevels_v_pRFParams(ds,lmmResults,roisToPlot,...
-                        cmapROIs,temporalModel, spatialModel,saveFigs, saveFigDir)
+function fH = makeFigure8_SuppressionLevels_v_pRFParams(ds,lmmResults,subjnrs,roisToPlot,...
+                        cmapROIs,spatialModel,temporalModel,useSTRetParams,saveFigs, saveFigDir)
 % Function to reproduce main manuscript figure 8: 
 % panel a: Suppression level (LMM  slopes) vs effective pRF size for each ROI
 % panel b: Suppression level (LMM  slopes) vs pRF CST exponent for each ROI
@@ -32,8 +32,6 @@ function fH = makeFigure8_SuppressionLevels_v_pRFParams(ds,lmmResults,roisToPlot
 % - fH         : figure handle
 %
 %% Get resampled data
-subjnrs = [1:3,7:13];
-useSTRetParams = false;
 output = resamplePRFParams_wReplacement(ds, roisToPlot, useSTRetParams, temporalModel, spatialModel, subjnrs);
 
 %% Panel A: Plot Suppression slopes vs CST pRF size
@@ -44,12 +42,12 @@ fH(1) = plotLMMregressionSlopes_v_pRFSize(lmmResults, ...
 fH(2) = plotLMMRegressionSlopes_v_pRFCSTExp(lmmResults,...
         output.median_resampledCSTExp,roisToPlot, cmapROIs, saveFigs,saveFigDir);
 
-%% Panel C:Plot CST pRF exponent vs CSS pRF exponent
-fH(3) = plotMeanCSTExponent_v_MeanCSSExponent(output.median_resampledCSTExp,...
-        output.median_resampledCSSExp,roisToPlot,cmapROIs,saveFigs,saveFigDir);
-
-%% Panel D:Plot CST pRF model sustained and transient beta weights 
-fH(4) = plotMeanCSTSustainedTransientBetaWeights(output.mean_resampledBetavalSust, ...
+%% Panel C:Plot CST pRF model sustained and transient beta weights 
+fH(3) = plotMeanCSTSustainedTransientBetaWeights(output.mean_resampledBetavalSust, ...
         output.mean_resampledBetavalTrans,roisToPlot,saveFigs,saveFigDir);
+ 
+%% Panel D:Plot CST pRF exponent vs CSS pRF exponent
+fH(4) = plotMeanCSTExponent_v_MeanCSSExponent(output.median_resampledCSTExp,...
+        output.median_resampledCSSExp,roisToPlot,cmapROIs,saveFigs,saveFigDir);
 
 

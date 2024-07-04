@@ -28,7 +28,7 @@ subplotOrder         = [2,1,4,3];
 conditionNamesSimSeq = {'Small & Short (0.2s)','Small & Long (1s)','Big & Short (0.2s)','Big & Long (1s)'};
 
 if plotModelAmpl
-    if size(lmmResults,2)>1
+    if size(lmmResults,1)>1
         cmap = getColormapPRFModels(0);
     else % DoG model
         cmap = getColormapPRFModels(2);

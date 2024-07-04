@@ -10,13 +10,14 @@ for idx = 1:size(deltaIdx,1)
     grandMean    = mean(deltasGroup(:,idx),1); % same as mean(mean(deltasSubj{idx},2)));
     grandSEM     = std(mean(deltasSubj{idx},2,'omitnan'),[],'omitnan')./sqrt(length(mean(deltasSubj{idx},2,'omitnan')));
     scatter(currMnSz,grandMean,100,cmapROIs(idx+1,:),'o','filled','MarkerEdgeColor',[0 0 0]); hold on;
-    plot(currMnSz+[-currSEMSz,currSEMSz],[grandMean,grandMean],'k-');
-    plot([currMnSz,currMnSz],grandMean+[-grandSEM,grandSEM],'k-');
+    plot(currMnSz+[-currSEMSz,currSEMSz],[grandMean,grandMean],'color',cmapROIs(idx+1,:));
+    plot([currMnSz,currMnSz],grandMean+[-grandSEM,grandSEM],'color',cmapROIs(idx+1,:));
 end
 title('Group Average +/- SEM: prf exponent vs Delta suppression slope','FontSize',13)
 xlim([-0.25 0.05]); ylim([-0.25 0.05]); box off; axis square
 plot([-0.25 0.05],[0 0],'k:','linewidth',2)
-xlabel('Delta Median CST pRF exponent (a.u.)');
+plot([0 0],[-0.25 0.05],'k:','linewidth',2)
+xlabel('Delta Median CST pRF exponent');
 ylabel('Delta suppression (difference in fitted regression slope)')
 
 if saveFigs

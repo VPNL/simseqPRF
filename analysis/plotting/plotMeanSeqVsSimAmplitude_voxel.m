@@ -64,6 +64,7 @@ if isempty(roisToPlot)
 elseif ~isempty(roisToPlot)
     if isnumeric(roisToPlot)
         tmp = allRoisToPlot(roisToPlot);
+        roiIdx = roisToPlot;
         roisToPlot = tmp;
     elseif iscell(roisToPlot)
         tmp = allRoisToPlot(ismember(allRoisToPlot,roisToPlot));
@@ -102,7 +103,7 @@ if plotAllSubjectsTogether
         ncols = length(roisToPlot);
         nrows = 1;
     elseif length(conditionOrderSimSeq)>1
-        fH = figure; set(gcf,'Position',[60, 438, 1920, 474]);
+        fH = figure; set(gcf,'Position',[1540 470 883 939]);
         ncols = length(conditionOrderSimSeq);
         nrows = length(roisToPlot);
     end
@@ -138,9 +139,11 @@ if plotAllSubjectsTogether
                     if idx==5, xlabel('SEQ ampl (BOLD % signal)','FontSize',8); end
                     if idx==1, ylabel('SIM ampl (BOLD % signal)','FontSize',8); end
                 else
-                    subplot(nrows,ncols,plotOrder(c)); hold on;
-                    ylabel('SIM ampl (BOLD % signal)','FontSize',8);
-                    xlabel('SEQ ampl (BOLD % signal)','FontSize',8);
+                    subplot(nrows,ncols,((idx-1)*length(conditionOrderSimSeq)) + plotOrder(c)); hold on;
+                    if idx==1 & plotOrder(c)==1, 
+                        ylabel('SIM ampl (BOLD % signal)','FontSize',8);
+                        xlabel('SEQ ampl (BOLD % signal)','FontSize',8);
+                    end
                 end
                 title(sprintf('%s: %s',string(roisToPlot(idx)), conditionNamesSimSeq{c}),'FontSize',10);
 
@@ -164,7 +167,7 @@ if plotAllSubjectsTogether
                     cb.Label.String = 'effective pRF size (deg)';
                     cb.TickDirection = 'out'; cb.Box = 'off';
                     cb.Ticks = edgesSz;
-                    if idx<length(roisToPlot), cb.Visible = "off"; end
+                    if idx>1  plotOrder(c)>1, cb.Visible = "off"; end
                 end
                 
                 if plotFitFlag
@@ -191,22 +194,22 @@ if plotAllSubjectsTogether
             end
         end
     end  
-        if (ve_thresh > 0) || (nc_thresh > 0)
-            if plotModelAmpl
-                sgtitle(sprintf('All Subjects: Seq vs Sim predicted amplitudes by %s (voxels with pRF ve>%1.1f & nc>%1.1f)', ...
-                    whichModelToPlot, ve_thresh, nc_thresh))
-            else
-                sgtitle(sprintf('All Subjects: Seq vs Sim amplitudes (voxels with pRF ve>%1.1f & nc>%1.1f)', ...
-                    ve_thresh, nc_thresh))
-            end
+    if (ve_thresh > 0) || (nc_thresh > 0)
+        if plotModelAmpl
+            sgtitle(sprintf('All Subjects: Seq vs Sim predicted amplitudes by %s (voxels with pRF ve>%1.1f & nc>%1.1f)', ...
+                whichModelToPlot, ve_thresh, nc_thresh))
         else
-            if plotModelAmpl
-                sgtitle(sprintf('All Subjects: Seq vs Sim predicted amplitudes by %s (all voxels)', ...
-                    whichModelToPlot))
-            else
-                sgtitle('All Subjects: Seq vs Sim amplitudes (all voxels)')
-            end
+            sgtitle(sprintf('All Subjects: Seq vs Sim amplitudes (voxels with pRF ve>%1.1f & nc>%1.1f)', ...
+                ve_thresh, nc_thresh))
         end
+    else
+        if plotModelAmpl
+            sgtitle(sprintf('All Subjects: Seq vs Sim predicted amplitudes by %s (all voxels)', ...
+                whichModelToPlot))
+        else
+            sgtitle('All Subjects: Seq vs Sim amplitudes (all voxels)')
+        end
+    end
 
     % Save figure
     if saveFigs
@@ -245,7 +248,7 @@ else
     for sj = 1:length(subjnrs)
         % Loop over ROIs
         for idx = 1:length(roisToPlot)
-            fH = figure(50); clf; set(gcf,'Position',[60, 438, 1920, 474]);
+            fH = figure(50); set(gcf,'Position',[60, 438, 1920, 474]);
             
             for c = conditionOrderSimSeq
                 % Get PRF CST size and exp
@@ -279,15 +282,18 @@ else
                     
                     subplot(1,4,plotOrder(c)); hold on;
                     title(sprintf('%s: %s',string(unique(tmpT.ROI)),  conditionNamesSimSeq{c}),'FontSize',10);
-                    ylabel('SIM (% signal)','FontSize',10);
-                    xlabel('SEQ (% signal)','FontSize',8);
+                    if idx == 1, 
+                        ylabel('SIM (% signal)','FontSize',8); 
+                        xlabel('SEQ (% signal)','FontSize',8);
+                    end
+                    
                     
                     plot([-5 21],[0 0],'k','lineWidth',0.25)
                     plot([0 0],[-5 21],'k','lineWidth',0.25)
                     plot([-5 21],[-5 21],'k:','lineWidth',0.25)
                     set(gca, 'FontSize',10);
                     box off; axis square
-                    set(gca,'xlim', axRange(idx,:), 'ylim',axRange(idx,:));
+                    set(gca,'xlim', axRange(roiIdx(idx),:), 'ylim',axRange(roiIdx(idx),:));
                     
                     if plotDataFlag
                         [~,vIdx] = sort(szCSTToPlot,'ascend');
@@ -301,7 +307,9 @@ else
                         cb.Label.String = 'effective pRF size (deg)';
                         cb.TickDirection = 'out'; cb.Box = 'off';
                         cb.Ticks = edgesSz;
-                        
+                        if plotOrder(c)<length(plotOrder),
+                            cb.Visible = "off";
+                        end
                     end
                     
                     if plotFitFlag
