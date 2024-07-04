@@ -7,12 +7,12 @@ The goal of this project is to operationalize and elucidate how simultaneous and
 ## Paper
 Title: Rethinking simultaneous suppression in visual cortex via compressive spatiotemporal population receptive fields.
 Authors: Kupers, Kim, Grill-Spector
-Year: 2023
-Journal: XXX
+Year: 2024
+Journal: Nature Communications
 DOI: XXX
 
 ## Data
-Data are stored on the Open Science Foundation URL: https://osf.io/rpuhs
+Data are stored on the Open Science Foundation URL: https://osf.io/rpuhs (main paper) and https://osf.io/e83az/ (supplemental data).
 
 ## Dependencies:
 SpatiotemporalPRF toolbox: https://github.com/VPNL/spatiotemporalPRFs  
