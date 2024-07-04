@@ -24,7 +24,7 @@ end
 % title('Mean across conditions','FontSize',13)
 xlim([0 0.1]); ylim([0 1]); box off; axis square;
 set(gca,'XTick',[0:0.01:1],'YTick',[0.1:0.1:1])
-xlabel('Median pRF DN-ST semisaturation (a.u.)');
+xlabel('Median pRF DN-ST semisaturation');
 ylabel('Suppression level (fitted regression slope)')
 l = gca;
 legend(l.Children([(length(l.Children)-1):-3:1]),string(roisToPlot), ...

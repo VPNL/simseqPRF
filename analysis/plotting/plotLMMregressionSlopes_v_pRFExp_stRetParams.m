@@ -48,7 +48,7 @@ elseif strcmp(modelToPlot,'DN_ST')
     xlim([0.9 2.1]); ylim([0 1]); box off; axis square
     set(gca,'XTick',[1.2:0.2:2],'YTick',[0.2:0.2:1])
 end
-xlabel('Median pRF size (deg)');
+xlabel('Median pRF exponent');
 ylabel('Suppression (fitted regression slope)')
 l = gca;
 legend(l.Children([length(l.Children):-3:length(l.Children)-6]),...

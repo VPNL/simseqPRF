@@ -98,53 +98,53 @@ for ii = 1:length(roisToPlot)
     fprintf('\n')
 end
 
-%% Visualize LMM0
-x = [-1:0.01:2];
-idx = 1;
-for sj = 1:nrSubjects
-figure(10+sj); set(gcf, 'Position', [8,454,1906,523]); clf;
-    for c = 1:nrConditions
-    
-        xToPlot = ds.MeanSeqAmp(ds.Subject==sj & ...
-            ds.ROI==nominal(roisToPlot(idx)) & ...
-            ds.Condition==nominal(c));
-        
-        yToPlot = ds.MeanSimAmp(ds.Subject==sj & ...
-            ds.ROI==nominal(roisToPlot(idx)) & ...
-            ds.Condition==nominal(c));
-        
-        tmpT = table();
-        tmpT.MeanSeqAmp = xToPlot;
-        tmpT.MeanSimAmp = yToPlot;
-        tmpT.Subject    = ones(size(xToPlot)).*sj;
-        tmpT.ROI        = repmat(roisToPlot(idx),size(xToPlot));
-        tmpT.Condition  = ones(size(xToPlot)).*c;
-        
-        tmpT           = table2dataset(tmpT);
-        tmpT.Condition = nominal(tmpT.Condition);
-        tmpT.ROI       = nominal(tmpT.ROI);
-        
-        [ypred, ypredCI] = predict(fLMM{idx}, tmpT);
-        [ypred0, ypredCI0] = predict(fLMM_alt0{idx}, tmpT); % 'Conditional',0);
-        
-        subplot(1,4,c); hold all;
-        title(sprintf('S%d: %s Condition %d', sj, string(roisToPlot(idx)),c));
-        plot(xToPlot, yToPlot,'o')
-        plot(xToPlot, ypred,'r-', 'LineWidth',4)
-        plot(xToPlot, ypred0,'b-', 'LineWidth',4)
-        
-        plot([0 0], [-1 2.5],'k-')
-        plot([-1 2.5],[0 0 ],'k-')
-        x = min(xToPlot):0.01:max(xToPlot);
-        plot(0,subjIntercepts{idx}(sj,c),'go', 'LineWidth',4)
-        plot(x,(x.*subjSlopes{idx}(sj,c))+subjIntercepts{idx}(sj,c), 'g:', 'LineWidth',4)
-        plot(0,subjIntercepts_alt0{idx}(sj),'co', 'LineWidth',4)
-        plot(x,(x.*fixedSlopes_alt0{idx})+subjIntercepts_alt0{idx}(sj), 'c:', 'LineWidth',4)
-
-        axis square
-    end
-    sgtitle('LMM main (red/green) v. LMM alt0 (blue/cyan) - fixed effect: SEQ Ampl, random effect: Subject intercept')
-end
+%% debug LMM0
+% x = [-1:0.01:2];
+% idx = 1;
+% for sj = 1:nrSubjects
+% figure(10+sj); set(gcf, 'Position', [8,454,1906,523]); clf;
+%     for c = 1:nrConditions
+%     
+%         xToPlot = ds.MeanSeqAmp(ds.Subject==sj & ...
+%             ds.ROI==nominal(roisToPlot(idx)) & ...
+%             ds.Condition==nominal(c));
+%         
+%         yToPlot = ds.MeanSimAmp(ds.Subject==sj & ...
+%             ds.ROI==nominal(roisToPlot(idx)) & ...
+%             ds.Condition==nominal(c));
+%         
+%         tmpT = table();
+%         tmpT.MeanSeqAmp = xToPlot;
+%         tmpT.MeanSimAmp = yToPlot;
+%         tmpT.Subject    = ones(size(xToPlot)).*sj;
+%         tmpT.ROI        = repmat(roisToPlot(idx),size(xToPlot));
+%         tmpT.Condition  = ones(size(xToPlot)).*c;
+%         
+%         tmpT           = table2dataset(tmpT);
+%         tmpT.Condition = nominal(tmpT.Condition);
+%         tmpT.ROI       = nominal(tmpT.ROI);
+%         
+%         [ypred, ypredCI] = predict(fLMM{idx}, tmpT);
+%         [ypred0, ypredCI0] = predict(fLMM_alt0{idx}, tmpT); % 'Conditional',0);
+%         
+%         subplot(1,4,c); hold all;
+%         title(sprintf('S%d: %s Condition %d', sj, string(roisToPlot(idx)),c));
+%         plot(xToPlot, yToPlot,'o')
+%         plot(xToPlot, ypred,'r-', 'LineWidth',4)
+%         plot(xToPlot, ypred0,'b-', 'LineWidth',4)
+%         
+%         plot([0 0], [-1 2.5],'k-')
+%         plot([-1 2.5],[0 0 ],'k-')
+%         x = min(xToPlot):0.01:max(xToPlot);
+%         plot(0,subjIntercepts{idx}(sj,c),'go', 'LineWidth',4)
+%         plot(x,(x.*subjSlopes{idx}(sj,c))+subjIntercepts{idx}(sj,c), 'g:', 'LineWidth',4)
+%         plot(0,subjIntercepts_alt0{idx}(sj),'co', 'LineWidth',4)
+%         plot(x,(x.*fixedSlopes_alt0{idx})+subjIntercepts_alt0{idx}(sj), 'c:', 'LineWidth',4)
+% 
+%         axis square
+%     end
+%     sgtitle('LMM main (red/green) v. LMM alt0 (blue/cyan) - fixed effect: SEQ Ampl, random effect: Subject intercept')
+% end
 
 %% LLM alt1
 % fixed ampl & condition effects + 1 random subject intercept (same for each condition).
@@ -188,49 +188,49 @@ end
 
 %% Visualize LMM alt1: fixed and random effects for V1
 
-idx = 1;
-for sj = 1:nrSubjects
-    figure(10+sj); set(gcf, 'Position', [8,454,1906,523]); clf;
-    for c = 1:nrConditions
-        xToPlot = ds.MeanSeqAmp(ds.Subject==sj & ...
-            ds.ROI==nominal(roisToPlot(idx)) & ...
-            ds.Condition==nominal(c));
-        
-        yToPlot = ds.MeanSimAmp(ds.Subject==sj & ...
-            ds.ROI==nominal(roisToPlot(idx)) & ...
-            ds.Condition==nominal(c));
-        
-        tmpT = table();
-        tmpT.MeanSeqAmp = xToPlot;
-        tmpT.MeanSimAmp = yToPlot;
-        tmpT.Subject    = ones(size(xToPlot)).*sj;
-        tmpT.ROI        = repmat(roisToPlot(idx),size(xToPlot));
-        tmpT.Condition  = ones(size(xToPlot)).*c;
-        
-        tmpT           = table2dataset(tmpT);
-        tmpT.Condition = nominal(tmpT.Condition);
-        tmpT.ROI       = nominal(tmpT.ROI);
-        
-        [ypred, ypredCI] = predict(fLMM{idx}, tmpT);
-        [ypred1, ypredCI1] = predict(fLMM_alt1{idx}, tmpT); %, 'Conditional',0);
-        
-        subplot(1,4,c); hold all;
-        title(sprintf('S%d: %s Condition %d', sj, string(roisToPlot(idx)),c));
-        plot(xToPlot, yToPlot,'o')
-        plot(xToPlot, ypred,'r-', 'LineWidth',4)
-        plot(xToPlot, ypred1,'b-', 'LineWidth',4)
-        
-        plot([0 0], [-1 2.5],'k-')
-        plot([-1 2.5],[0 0 ],'k-')
-        x = min(xToPlot):0.01:max(xToPlot);
-        plot(0,subjIntercepts{idx}(sj,c),'go', 'LineWidth',4)
-        plot(x,(x.*subjSlopes{idx}(sj,c))+subjIntercepts{idx}(sj,c), 'g:', 'LineWidth',4)
-        plot(0,subjIntercepts_alt1{idx}(sj,c),'co', 'LineWidth',4)
-        plot(x,(x.*fixedSlopes_alt1{idx}(c))+subjIntercepts_alt1{idx}(sj,c), 'c:', 'LineWidth',4)
-        axis square
-    end
-    sgtitle('LMM main v. LMM alternative 1 - fixed effect: SEQ Ampl * Condition, random effect: Subject intercept')
-end
+% idx = 1;
+% for sj = 1:nrSubjects
+%     figure(10+sj); set(gcf, 'Position', [8,454,1906,523]); clf;
+%     for c = 1:nrConditions
+%         xToPlot = ds.MeanSeqAmp(ds.Subject==sj & ...
+%             ds.ROI==nominal(roisToPlot(idx)) & ...
+%             ds.Condition==nominal(c));
+%         
+%         yToPlot = ds.MeanSimAmp(ds.Subject==sj & ...
+%             ds.ROI==nominal(roisToPlot(idx)) & ...
+%             ds.Condition==nominal(c));
+%         
+%         tmpT = table();
+%         tmpT.MeanSeqAmp = xToPlot;
+%         tmpT.MeanSimAmp = yToPlot;
+%         tmpT.Subject    = ones(size(xToPlot)).*sj;
+%         tmpT.ROI        = repmat(roisToPlot(idx),size(xToPlot));
+%         tmpT.Condition  = ones(size(xToPlot)).*c;
+%         
+%         tmpT           = table2dataset(tmpT);
+%         tmpT.Condition = nominal(tmpT.Condition);
+%         tmpT.ROI       = nominal(tmpT.ROI);
+%         
+%         [ypred, ypredCI] = predict(fLMM{idx}, tmpT);
+%         [ypred1, ypredCI1] = predict(fLMM_alt1{idx}, tmpT); %, 'Conditional',0);
+%         
+%         subplot(1,4,c); hold all;
+%         title(sprintf('S%d: %s Condition %d', sj, string(roisToPlot(idx)),c));
+%         plot(xToPlot, yToPlot,'o')
+%         plot(xToPlot, ypred,'r-', 'LineWidth',4)
+%         plot(xToPlot, ypred1,'b-', 'LineWidth',4)
+%         
+%         plot([0 0], [-1 2.5],'k-')
+%         plot([-1 2.5],[0 0 ],'k-')
+%         x = min(xToPlot):0.01:max(xToPlot);
+%         plot(0,subjIntercepts{idx}(sj,c),'go', 'LineWidth',4)
+%         plot(x,(x.*subjSlopes{idx}(sj,c))+subjIntercepts{idx}(sj,c), 'g:', 'LineWidth',4)
+%         plot(0,subjIntercepts_alt1{idx}(sj,c),'co', 'LineWidth',4)
+%         plot(x,(x.*fixedSlopes_alt1{idx}(c))+subjIntercepts_alt1{idx}(sj,c), 'c:', 'LineWidth',4)
+%         axis square
+%     end
+%     sgtitle('LMM main v. LMM alternative 1 - fixed effect: SEQ Ampl * Condition, random effect: Subject intercept')
+% end
 
 
 
@@ -271,50 +271,50 @@ for ii = 1:length(roisToPlot)
     compareLMMs_LMM2_v_Main{ii} = compareLMMmodels(fLMM_alt2{ii},fLMM{ii});
 end
 
-%% Visualize LMM2
-idx = 1;
-for sj = 1:nrSubjects
-    figure(10+sj); set(gcf, 'Position', [8,454,1906,523]); clf;
-    for c = 1:nrConditions
-        xToPlot = ds.MeanSeqAmp(ds.Subject==sj & ...
-            ds.ROI==nominal(roisToPlot(idx)) & ...
-            ds.Condition==nominal(c));
-        
-        yToPlot = ds.MeanSimAmp(ds.Subject==sj & ...
-            ds.ROI==nominal(roisToPlot(idx)) & ...
-            ds.Condition==nominal(c));
-        
-        tmpT = table();
-        tmpT.MeanSeqAmp = xToPlot;
-        tmpT.MeanSimAmp = yToPlot;
-        tmpT.Subject    = ones(size(xToPlot)).*sj;
-        tmpT.ROI        = repmat(roisToPlot(idx),size(xToPlot));
-        tmpT.Condition  = ones(size(xToPlot)).*c;
-        
-        tmpT           = table2dataset(tmpT);
-        tmpT.Condition = nominal(tmpT.Condition);
-        tmpT.ROI       = nominal(tmpT.ROI);
-        
-        [ypred, ypredCI] = predict(fLMM{idx}, tmpT);
-        [ypred2, ypredCI2] = predict(fLMM_alt2{idx}, tmpT);%, 'Conditional',0);
-        
-        subplot(1,4,c); hold all;
-        title(sprintf('S%d: %s Condition %d', sj, string(roisToPlot(idx)),c));
-        plot(xToPlot, yToPlot,'ko')
-        plot(xToPlot, ypred,'r-', 'LineWidth',4)
-        plot(xToPlot, ypred2,'b-', 'LineWidth',4)
-        
-        plot([0 0], [-1 2.5],'k-')
-        plot([-1 2.5],[0 0 ],'k-')
-        
-        x = min(xToPlot):0.01:max(xToPlot);
-        plot(0,subjIntercepts{idx}(sj,c),'go', 'LineWidth',4)
-        plot(x,(x.*subjSlopes{idx}(sj,c))+subjIntercepts{idx}(sj,c), 'g:', 'LineWidth',4)
-        plot(0,subjIntercepts_alt2{idx}(sj,c),'co', 'LineWidth',4)
-        plot(x,(x.*fixedSlopes_alt2{idx}(c))+subjIntercepts_alt2{idx}(sj,c), 'c:', 'LineWidth',4)
-        axis square
-    end
-end
+% %% Visualize LMM2
+% idx = 1;
+% for sj = 1:nrSubjects
+%     figure(10+sj); set(gcf, 'Position', [8,454,1906,523]); clf;
+%     for c = 1:nrConditions
+%         xToPlot = ds.MeanSeqAmp(ds.Subject==sj & ...
+%             ds.ROI==nominal(roisToPlot(idx)) & ...
+%             ds.Condition==nominal(c));
+%         
+%         yToPlot = ds.MeanSimAmp(ds.Subject==sj & ...
+%             ds.ROI==nominal(roisToPlot(idx)) & ...
+%             ds.Condition==nominal(c));
+%         
+%         tmpT = table();
+%         tmpT.MeanSeqAmp = xToPlot;
+%         tmpT.MeanSimAmp = yToPlot;
+%         tmpT.Subject    = ones(size(xToPlot)).*sj;
+%         tmpT.ROI        = repmat(roisToPlot(idx),size(xToPlot));
+%         tmpT.Condition  = ones(size(xToPlot)).*c;
+%         
+%         tmpT           = table2dataset(tmpT);
+%         tmpT.Condition = nominal(tmpT.Condition);
+%         tmpT.ROI       = nominal(tmpT.ROI);
+%         
+%         [ypred, ypredCI] = predict(fLMM{idx}, tmpT);
+%         [ypred2, ypredCI2] = predict(fLMM_alt2{idx}, tmpT);%, 'Conditional',0);
+%         
+%         subplot(1,4,c); hold all;
+%         title(sprintf('S%d: %s Condition %d', sj, string(roisToPlot(idx)),c));
+%         plot(xToPlot, yToPlot,'ko')
+%         plot(xToPlot, ypred,'r-', 'LineWidth',4)
+%         plot(xToPlot, ypred2,'b-', 'LineWidth',4)
+%         
+%         plot([0 0], [-1 2.5],'k-')
+%         plot([-1 2.5],[0 0 ],'k-')
+%         
+%         x = min(xToPlot):0.01:max(xToPlot);
+%         plot(0,subjIntercepts{idx}(sj,c),'go', 'LineWidth',4)
+%         plot(x,(x.*subjSlopes{idx}(sj,c))+subjIntercepts{idx}(sj,c), 'g:', 'LineWidth',4)
+%         plot(0,subjIntercepts_alt2{idx}(sj,c),'co', 'LineWidth',4)
+%         plot(x,(x.*fixedSlopes_alt2{idx}(c))+subjIntercepts_alt2{idx}(sj,c), 'c:', 'LineWidth',4)
+%         axis square
+%     end
+% end
 
 
 %% Compare alternative LMMs to eachother
@@ -364,13 +364,13 @@ for ii = 1:length(roisToPlot)
     LogLik_1_v_Main(ii,:) = compareLMMs_LMM1_v_Main{ii}.LogLik;
     LogLik_2_v_Main(ii,:) = compareLMMs_LMM2_v_Main{ii}.LogLik;
     
-    pVals_0_v_Main(ii,:) = compareLMMs_LMM0_v_Main{ii}.pValue(1);
-    pVals_1_v_Main(ii,:) = compareLMMs_LMM1_v_Main{ii}.pValue(1);
-    pVals_2_v_Main(ii,:) = compareLMMs_LMM2_v_Main{ii}.pValue(1);
-
-    DF_0_v_Main(ii,:) = compareLMMs_LMM0_v_Main{ii}.deltaDF;
-    DF_1_v_Main(ii,:) = compareLMMs_LMM1_v_Main{ii}.deltaDF;
-    DF_2_v_Main(ii,:) = compareLMMs_LMM2_v_Main{ii}.deltaDF;
+%     pVals_0_v_Main(ii,:) = compareLMMs_LMM0_v_Main{ii}.pValue(1);
+%     pVals_1_v_Main(ii,:) = compareLMMs_LMM1_v_Main{ii}.pValue(1);
+%     pVals_2_v_Main(ii,:) = compareLMMs_LMM2_v_Main{ii}.pValue(1);
+% 
+%     DF_0_v_Main(ii,:) = compareLMMs_LMM0_v_Main{ii}.deltaDF;
+%     DF_1_v_Main(ii,:) = compareLMMs_LMM1_v_Main{ii}.deltaDF;
+%     DF_2_v_Main(ii,:) = compareLMMs_LMM2_v_Main{ii}.deltaDF;
 end
 
 %% Compute differences in goodness-of-fit metrics
@@ -379,7 +379,7 @@ BIC_main_v_m012 = [BIC_0_v_Main(:,1)-BIC_0_v_Main(:,2), BIC_1_v_Main(:,1)-BIC_1_
 LL_main_v_m012  = [LogLik_0_v_Main(:,1)-LogLik_0_v_Main(:,2), LogLik_1_v_Main(:,1)-LogLik_1_v_Main(:,2), LogLik_2_v_Main(:,1)-LogLik_2_v_Main(:,2)];
 
 %% Plot AIC, BIC, LL differences
-figure(99); clf; set(gcf,'Position',[1602,363,1279,834]);
+fH = figure(99); clf; set(gcf,'Position',[1602,363,1279,834]);
 sgtitle('LMM comparisions relative to model 3 (random subject slope & intercept)')
 subplot(131); 
 b1 = bar(1:length(roisToPlot),LL_main_v_m012);
