@@ -1,26 +1,45 @@
 function fH = plotDataModelFitSTRet_singleVoxel_StimulusConditionBlocks(projectDir,subjnrs,varargin)
-
+% Function to plot single voxel time series for each SEQ-SIM stimulus
+% condition. This function is used in Figures 2, 3, 6, Suppl figure 7,8,9
+% in the paper:
+%
+% Title:   Rethinking simultaneous suppression in visual cortex via 
+%          compressive spatiotemporal population receptive fields.
+% Authors: Kupers, Kim, Grill-Spector (2024).
+% Journal: Nature Communications
+% DOI:     XXX
+%
+% INPUTS (required):
+% - projectDir  : base directory of project
+% - subjnrs     : subjnrs to plot: [1,2,3,7,8,9,10,11,12,13]
+%
+%
+% OUTPUTS:
+% - fH         : figure handle
+%
+% Code written by E.R. Kupers (2023) Stanford University
+%
 % Parse inputs
 p = inputParser;
-p.addRequired('projectDir', @ischar); % '/oak/stanford/groups/kalanit/biac2/kgs/projects/spatiotemporal';
-p.addRequired('subjnrs', @isnumeric); % Subject nrs are: [1,2,3,7,8,9,10,11,12,13]
-p.addParameter('plotModelFlag',true, @islogical);
-p.addParameter('roisToPlot',[],@(x) (iscell(x) || isnumeric(x)));
-p.addParameter('roiType','stimcorner4_area4sq_eccen5_stRet_CSTopt_DNST_matchingVoxels',@ischar);
-p.addParameter('hemi','both',@(x) any(validatestring(x,{'lh','rh','both'})));
-p.addParameter('selectedDataVoxels',[],@isnumeric)
-p.addParameter('spatialModel',{'onegaussianFit','onegaussianFit','onegaussianFit'}, @iscell);
-p.addParameter('temporalModel',{'3ch-stLN','3ch-stLN','1ch-dcts'}, @iscell);
-p.addParameter('mdllbl',{'CSTfix','CSTopt','DNST'}, @iscell);
+p.addRequired('projectDir', @ischar); 
+p.addRequired('subjnrs', @isnumeric); 
+p.addParameter('plotModelFlag',true, @islogical);                           % Plot model prediction of not?
+p.addParameter('roisToPlot',[],@(x) (iscell(x) || isnumeric(x)));           % What ROI to plot?
+p.addParameter('roiType','stimcorner4_area4sq_eccen5_stRet_CSTopt_DNST_matchingVoxels',@ischar); % What subtype of ROI to use?
+p.addParameter('hemi','both',@(x) any(validatestring(x,{'lh','rh','both'}))); % What hemisphere voxels to plot?
+p.addParameter('selectedDataVoxels',[],@isnumeric)                          % Index of specific voxel you want to plot.
+p.addParameter('spatialModel',{'onegaussianFit','onegaussianFit','onegaussianFit'}, @iscell); % Spatial model name
+p.addParameter('temporalModel',{'3ch-stLN','3ch-stLN','1ch-dcts'}, @iscell); % Temporal model name
+p.addParameter('mdllbl',{'CSTfix','CSTopt','DNST'}, @iscell);               % Model label    
 p.addParameter('nrbslTRs',4,@isnumeric);                                    % figure params: nr of baseline TRs, prior to block onset
 p.addParameter('nrows',4, @isnumeric);                                      % figure params: nr of rows
 p.addParameter('ncols',8, @isnumeric);                                      % figure params: nr of columns
 p.addParameter('sbplOrder',[4,2,8,6,3,1,7,5], @isnumeric);                  % figure params: horizontal plotting order of conditions
 p.addParameter('xl',19, @isnumeric);                                        % figure params: x-axis length (nr time points
 p.addParameter('maxTrial',[-5 15], @isnumeric);                             % figure params: time axis of trial (seconds)
-p.addParameter('saveFigs',false, @islogical);
-p.addParameter('saveFigDir',[],@ischar);
-p.addParameter('subDir',[],@ischar);
+p.addParameter('saveFigs',false, @islogical);                               % save figure or not?
+p.addParameter('saveFigDir',[],@ischar);                                    % define figure directory
+p.addParameter('subDir',[],@ischar);                                        % define figure subdirectory
 p.parse(projectDir,subjnrs,varargin{:});
 
 % Rename variables

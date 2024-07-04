@@ -1,30 +1,58 @@
 function fH = plotLMMregressionSlopes_v_pRFSize_stRetParams(allLMMResults, ...
     params, modelToPlot, roisToPlot, cmapROIs, saveFigs, saveFigDir)
+% Function to plot LMM regression slopes against CSTfix, CSTopt, or DN-ST
+% pRF size. This is a panel in Supplementary figure 9 in the paper:
+% Title:   Rethinking simultaneous suppression in visual cortex via 
+%          compressive spatiotemporal population receptive fields.
+% Authors: Kupers, Kim, Grill-Spector (2024).
+% Journal: Nature Communications
+% DOI:     XXX
+%
+% INPUTS (required):
+% - allLMMResults  : 3 cells (CSTfix, CSTopt, DN-ST pRF model, 
+%                       each struct requires the following LMM parameters:
+%                       - subjSlopes: conditions by subjects (one cell for each ROI)
+% - params         : sampled pRF parameters (pRFs by ROIs)
+% - modelToPlot    : (string) model to plot, either 'CST_ST', or 'DN-ST'
+% - roisToPlot     : cell with ROI names to plot
+% - cmapROIs       : colormap for ROIs (roi by RGB)
+% - saveFigs       : save figures or not?
+% - saveFigDir     : folder to save figures
+%
+% OUTPUTS:
+% - fH         : figure handle
+%
+% Code written by E.R. Kupers (2023) Stanford University
+%
 
+%% We remove IPS data because we lack enough subjects with pRFs in this ROI
 ipsIdx    = cellfind(regexp(string(roisToPlot),'IPS0/IPS1','once'));
 roisNoIPS = setdiff([1:length(roisToPlot)],ipsIdx);
 
+% create figure
 fH = figure; set(gcf,'Position',[544   512   687   465]); hold all;
+
+% Start plotting
 for idx = roisNoIPS
-    
-    groupMnSzFix     = mean(params{1}.median_resampledPRFSz(:,idx),1,'omitnan');
-    groupSEMSzFix    = std(params{1}.median_resampledPRFSz(:,idx),[],1,'omitnan')./sqrt(sum(~isnan(params{1}.median_resampledPRFSz(:,idx))));
-    
-    groupMnSlopeFix   = mean(mean(allLMMResults{1}.subjSlopes{idx},2,'omitnan')); % same as mean(mean(subjSlopes{idx},2)));
-    groupSEMSlopeFix  = std(mean(allLMMResults{1}.subjSlopes{idx},2,'omitnan'))./sqrt(length(mean(allLMMResults{1}.subjSlopes{idx},2,'omitnan')));
-    
-    scatter(groupMnSzFix,groupMnSlopeFix,100,[1 1 1],'o','filled','MarkerEdgeColor',cmapROIs(idx,:), 'LineWidth',2); hold on;
-    plot(groupMnSzFix+[-groupSEMSzFix,groupSEMSzFix],[groupMnSlopeFix,groupMnSlopeFix],'color',[0 0 0]);
-    plot([groupMnSzFix,groupMnSzFix],groupMnSlopeFix+[-groupSEMSlopeFix,groupSEMSlopeFix],'color',[0 0 0]);
-    
+
     if strcmp(modelToPlot,'CST_ST')
+        groupMnSzFix     = mean(params{1}.median_resampledPRFSz(:,idx),1,'omitnan');
+        groupSEMSzFix    = std(params{1}.median_resampledPRFSz(:,idx),[],1,'omitnan')./sqrt(sum(~isnan(params{1}.median_resampledPRFSz(:,idx))));
+        
+        groupMnSlopeFix   = mean(mean(allLMMResults{1}.subjSlopes{idx},2,'omitnan')); % same as mean(mean(subjSlopes{idx},2)));
+        groupSEMSlopeFix  = std(mean(allLMMResults{1}.subjSlopes{idx},2,'omitnan'))./sqrt(length(mean(allLMMResults{1}.subjSlopes{idx},2,'omitnan')));
+        
+        scatter(groupMnSzFix,groupMnSlopeFix,100,[1 1 1],'o','filled','MarkerEdgeColor',cmapROIs(idx,:), 'LineWidth',2); hold on;
+        plot(groupMnSzFix+[-groupSEMSzFix,groupSEMSzFix],[groupMnSlopeFix,groupMnSlopeFix],'color',[0 0 0]);
+        plot([groupMnSzFix,groupMnSzFix],groupMnSlopeFix+[-groupSEMSlopeFix,groupSEMSlopeFix],'color',[0 0 0]);
+    
         groupSzST    = params{2}.median_resampledPRFSz(:,idx);
         groupSlopeST = mean(allLMMResults{2}.subjSlopes{idx},2,'omitnan');
         legendNames  = {'CST_{fix}','CST_{opt}'};
     elseif strcmp(modelToPlot,'DN_ST')
         groupSzST    = params{3}.median_resampledPRFSz(:,idx);
         groupSlopeST = mean(allLMMResults{3}.subjSlopes{idx},2,'omitnan');
-        legendNames  = {'CST_{fix}','DN-ST'};
+        legendNames  = {'DN-ST'};
     end
     
     % Compute group mean and SEM

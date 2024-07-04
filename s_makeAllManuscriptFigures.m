@@ -14,9 +14,9 @@
 %% Define params
 subjnrs          = [1,2,3,7,8,9,10,11,12,13];
 projectDir       = fullfile(simseqRootPath);
-figureGroup      = 'main'; % Choose from: 'main' (i.e., 'CST','CSS','LSS'),'suppl_DoG','suppl_stRet';
-saveFigs         = true; % Save figures or not
-loadLMMResults   = true; %true; % Load presaved results or recompute from scratch
+figureGroup      = 'main'; % Choose from: 'main' (i.e., 'CST','CSS','LSS' + suppl), ,'suppl_DoG','suppl_stRet';
+saveFigs         = true; % Save figures (true) or not (false)
+loadLMMResults   = true; % Load presaved results (true) or recompute from scratch (false)
 pths             = getSubjectPaths(projectDir,1);
 saveFigDir       = fullfile(simseqRootPath,'figures');
 saveFolderNameDS = fullfile(projectDir,'simseq/results/group');
@@ -29,10 +29,7 @@ conditionOrderSimSeq = [1:4];
 conditionNamesSimSeq = conditionNamesSimSeq(conditionOrderSimSeq);
 labelsComb           = {'V1','V2','V3','hV4','VO1/2','LO1/2','TO1/2','V3AB','IPS0/1'};
 roiOrder             = [1:6,8:11,7,12,13]; %V1-V02, LO1/2 + TO1/2, V3AB, IPS0/1
-combROIs             = [5,8,10,12]; %VO1/2 (5,6), LO1/2(8,9), TO1/2 (10,11), IPS0/1 (12,13)
-nrows                = 4; % number of rows in figures
-ncols                = 9; % number of columns in figures
-szMarker             = 5; % size of markers in figures
+combROIs             = [5,8,10,12]; % VO1/2 (5,6), LO1/2(8,9), TO1/2 (10,11), IPS0/1 (12,13)
 
 % Define noise and variance explained thresholds:
 nc_thresh            = 0.1; % threshold in percentage noise ceiling from simseq exp
@@ -41,7 +38,7 @@ ve_thresh            = 0.2; % threshold in percentage of pRF var expl. from toon
 % Set defaults for prettier figure plotting
 makeprettyfigures;
 
-
+% Get correct model names and colormap for the chosen figuregroup
 switch figureGroup
 
     case {'main'}
@@ -88,6 +85,7 @@ else
             getDataTableAndLMMResults(projectDir, lmmModelFlag, saveFolderNameDS,subjnrs);
     end
 end
+
 
 % Reorder ROIs
 if useSTRetParams

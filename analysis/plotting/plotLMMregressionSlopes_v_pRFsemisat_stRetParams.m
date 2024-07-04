@@ -1,9 +1,33 @@
 function fH = plotLMMregressionSlopes_v_pRFsemisat_stRetParams(allLMMResults, ...
     params, roisToPlot, cmapROIs, saveFigs, saveFigDir)
+% Function to plot LMM regression slopes against DN-ST pRF semi-saturation 
+% constant (Supplementary figure 9 in the paper:
+% Title:   Rethinking simultaneous suppression in visual cortex via 
+%          compressive spatiotemporal population receptive fields.
+% Authors: Kupers, Kim, Grill-Spector (2024).
+% Journal: Nature Communications
+% DOI:     XXX
+%
+% INPUTS (required):
+% - allLMMResults  : 3 cells (CSTfix, CSTopt, DN-ST pRF model, 
+%                       each struct requires the following LMM parameters:
+%                       - subjSlopes: conditions by subjects (one cell for each ROI)
+% - params         : sampled pRF parameters (pRFs by ROIs)
+% - roisToPlot     : cell with ROI names to plot
+% - cmapROIs       : colormap for ROIs (roi by RGB)
+% - saveFigs       : save figures or not?
+% - saveFigDir     : folder to save figures
+%
+% OUTPUTS:
+% - fH         : figure handle
+%
+% Code written by E.R. Kupers (2023) Stanford University
 
+%% Remove IPS data because we lack enough data
 ipsIdx    = cellfind(regexp(string(roisToPlot),'IPS0/IPS1','once'));
 roisNoIPS = setdiff([1:length(roisToPlot)],ipsIdx);
 
+% Create figure
 fH = figure; set(gcf,'Position',[544   512   687   465]); hold all;
 
 for idx = roisNoIPS

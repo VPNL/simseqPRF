@@ -14,8 +14,6 @@ function fH = makeSupplFigure8_STRetParams_TimeSeriesPredictionsRsquared(project
 % DOI:     XXX
 %
 % Requires getting MRI data from OSF (see downloadDataTableFromOSF.m)
-%
-% Code written by E.R. Kupers (2024) Stanford University
 % 
 % INPUTS (required):
 % - projectDir
@@ -30,6 +28,8 @@ function fH = makeSupplFigure8_STRetParams_TimeSeriesPredictionsRsquared(project
 % OUTPUTS:
 % - fH         : figure handle  
 %
+% Code written by E.R. Kupers (2024) Stanford University
+
 %% Set params
 cmapModels = getColormapPRFModels(3);
 

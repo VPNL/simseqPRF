@@ -27,6 +27,7 @@ function fH = makeSupplFigure6_compareLMMs(ds,roisToPlot,saveFigs,saveFigDir)
 % OUTPUTS:
 % - fH         : figure handle
 %
+% Written by ERK 2023 @ VPNL Stanford U
 
 %% MAIN LMM
 fLMM = cell(1,length(roisToPlot));

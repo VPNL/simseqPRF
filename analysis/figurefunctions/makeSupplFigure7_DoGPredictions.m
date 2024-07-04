@@ -14,8 +14,6 @@ function fH = makeSupplFigure7_DoGPredictions(projectDir,ds,lmmResults, ...
 % DOI:     XXX
 %
 % Requires getting MRI data from OSF (see downloadDataTableFromOSF.m)
-%
-% Code written by E.R. Kupers (2024) Stanford University
 % 
 % INPUTS (required):
 % - projectDir
@@ -38,7 +36,9 @@ function fH = makeSupplFigure7_DoGPredictions(projectDir,ds,lmmResults, ...
 % - saveFigDir      : folder to save figures
 %
 % OUTPUTS:
-% - fH         : figure handle            
+% - fH         : figure handle  
+%
+% Code written by E.R. Kupers (2024) Stanford University
             
 % Check inputs
 if isempty(cmapModels) || ~exist('cmapModels','var')

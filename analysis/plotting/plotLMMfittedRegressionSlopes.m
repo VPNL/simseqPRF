@@ -111,6 +111,7 @@ for mm = 1:length(LMMOrder)
                 end
             end
         end
+        plot([0.2 9.7],[1 1],'k--');
         title(sprintf('%s',conditionNamesSimSeq{c}))
         xlim([0.2 9.7]); ylim([0 1.31]); box off
         set(gca,'XTick',1:length(roisToPlot), 'XTickLabel',string(roisToPlot),'XTickLabelRotation',45)
