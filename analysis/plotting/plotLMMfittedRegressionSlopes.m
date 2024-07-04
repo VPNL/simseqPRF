@@ -28,10 +28,10 @@ subplotOrder         = [2,1,4,3];
 conditionNamesSimSeq = {'Small & Short (0.2s)','Small & Long (1s)','Big & Short (0.2s)','Big & Long (1s)'};
 
 if plotModelAmpl
-    if size(lmmResults,1)>1
+    if strcmp(LMMOrder{1},'DoG') % DoG model
+         cmap = getColormapPRFModels(2);
+    elseif size(lmmResults,1)>1
         cmap = getColormapPRFModels(0);
-    else % DoG model
-        cmap = getColormapPRFModels(2);
     end
 else
     cmap = cmapROIs;
@@ -102,7 +102,7 @@ for mm = 1:length(LMMOrder)
                     curMnSlope   = lmmResults(1).fixedSlopes{mm,idx}(c);
                     SE           = lmmResults(1).fixedSlopes_SE{mm,idx}(c);
                     if mm==1 && ~strcmp(LMMOrder{mm},'suppl_DoG')
-                        scatter(idx,curMnSlope,100,cmap(mm,:),'o','linewidth',0.15); hold on; %'MarkerEdgeColor',[0,0,0]
+                        scatter(idx,curMnSlope,100,cmap(mm,:),'o','filled','linewidth',0.15,'MarkerFaceColor',cmap(mm,:)); hold on; [0,0,0]
                     else
                         scatter(idx,curMnSlope,100,cmap(mm,:),'o','filled','linewidth',0.15); hold on; %'MarkerEdgeColor',[0,0,0]
                     end
@@ -121,7 +121,7 @@ end
 l = gca;
 if plotModelAmpl
     sgtitle('Group Average Data vs Model: LMM regression slopes (Mean +/-SE)');
-    if strcmp(LMMOrder{1},'suppl_DoG')
+    if strcmp(LMMOrder{1},'DoG')
         legend(l.Children([length(l.Children):-8:1]),LMMOrder{1:2}, 'FontSize',9, 'Location','SouthWest'); legend boxoff
     else
         legend(l.Children([length(l.Children):-30:1]),LMMOrder{1:3}, 'FontSize',9, 'Location','SouthWest'); legend boxoff

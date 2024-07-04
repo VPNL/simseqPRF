@@ -64,7 +64,7 @@ fH(1) = plotDataModelFitDoG_singleVoxel_StimulusConditionBlocks(...
 
 %% Panel B: Predicted and observed regression slopes (alike Figure 7)
 all_lmmResults = cat(1,lmmResults_Model,lmmResults);
-LMMOrder       = {modelName,'Data'};
+LMMOrder       = {modelName{1},'Data'};
 fH(2)          = plotLMMfittedRegressionSlopes(ds, all_lmmResults,LMMOrder, ...
                     roisToPlot,cmapModels,useSTRetParams, saveFigs, saveFigDir);
 
