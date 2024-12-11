@@ -1,15 +1,11 @@
 # simseqPRF
-Code accompanying the paper "Rethinking simultaneous suppression in visual cortex via compressive spatiotemporal population receptive fields" by Kupers, Kim, & Grill-Spector
+Code accompanying the paper "Rethinking simultaneous suppression in visual cortex via compressive spatiotemporal population receptive fields" by Kupers, Kim, & Grill-Spector (2024) published in Nature Communications.
 
 ## Goal
-The goal of this project is to operationalize and elucidate how simultaneous and sequential visual stimuli are processed within population receptive fields, in space and time, and generate a lower response for simultaneous over sequential presentations.
+The goal of this project is to operationalize and elucidate how simultaneous and sequential visual stimuli are processed within population receptive fields, in space and time, and generate a lower response for simultaneous over sequential stimulus presentations of otherwise similar colorful peripheral square stimuli.
 
-## Paper
-Title: Rethinking simultaneous suppression in visual cortex via compressive spatiotemporal population receptive fields.
-Authors: Kupers, Kim, Grill-Spector
-Year: 2024
-Journal: Nature Communications
-DOI: XXX
+## Paper citation
+Kupers, E.R., Kim, I. & Grill-Spector, K. Rethinking simultaneous suppression in visual cortex via compressive spatiotemporal population receptive fields. Nat Commun 15, 6885 (2024). https://doi.org/10.1038/s41467-024-51243-7
 
 ## Data
 Data are stored on the Open Science Foundation URL: https://osf.io/rpuhs (main paper) and https://osf.io/e83az/ (supplemental data).
@@ -17,7 +13,7 @@ Data are stored on the Open Science Foundation URL: https://osf.io/rpuhs (main p
 ## Dependencies:
 SpatiotemporalPRF toolbox: https://github.com/VPNL/spatiotemporalPRFs  
 VistaSoft toolbox: https://github.com/vistalab/vistasoft  
---> NB current version of VistaSoft might still be in the process of implementing spatiotemporal pRF simulation code. In the meantime, you can use Insub Kim's forked repository here: https://github.com/KimInsub/vistasoft
+NOTE: We are in the process of integrating the spatiotemporal pRF simulation code (stRet toolbox by Insub Kim) into the main vistasoft toolbox. We recommend using Insub Kim's forked repository (https://github.com/KimInsub/vistasoft) in the meantime.
 
 ## Overview of analysis pipeline
 * simseqRootPath.m
@@ -29,11 +25,11 @@ VistaSoft toolbox: https://github.com/vistalab/vistasoft
     - Fit model predictions to data
     - Find best fitting R^2 for CST pRF exponent (grid fit)
     - General visualization
-* s_makeAllManuscriptFigures.m : Recreate manuscript figures 2,3,4,6,7,8 and supplementary figures
+* s_makeAllManuscriptFigures.m : Recreate manuscript figures 2,3,4,6,7,8 and supplementary figures with data and simulations
 * stimulus/
     - folder with code for stimulus generation and running MRI experiment (stim_mri)
 * external/
-    - folder with code from other toolboxes
+    - folder with borrowed functions from other toolboxes
 * analysis/
     - folder with analysis scripts and subfunctions, and figure plotting functions
 
